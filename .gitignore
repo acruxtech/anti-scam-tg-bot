@@ -1,0 +1,6 @@
+.idea
+.env
+Задачи.txt
+venv
+**/__pycache__/**
+**.pyc
