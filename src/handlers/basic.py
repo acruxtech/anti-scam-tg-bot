@@ -22,16 +22,14 @@ async def start(message: Message, bot: Bot):
 
 @basic_router.message(F.user_shared)
 async def get_contact(message: Message, bot: Bot):
-    await message.answer(f"Контакт получен, его ID = {message.user_shared.user_id}")
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)
 
     if scammer:
-        await message.answer("Он скаммер!")
+        scammer_message = "Этот пользователь - скаммер!   ❌"
     else:
-        await message.answer("Такого человека нет в БД")
+        scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
 
-
-
-
-
-
+    await message.answer(f"{scammer_message}\n\n"
+                         f"<b>Информация о пользователе:</b>\n\n"
+                         f"ID Пользователя = <code>{message.user_shared.user_id}</code>")
+    

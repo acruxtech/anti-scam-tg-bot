@@ -29,11 +29,12 @@ class SQLAlchemyRepository(RepositoryInterface):
         async with async_session_maker() as session:
             stmt = insert(self.model).returning(self.model).values(**data)
             try:
-                await session.execute(stmt)
+                result = await session.execute(stmt)
             except IntegrityError:
                 raise IntegrityException
             else:
                 await session.commit()
+                return result.scalar()
 
     async def get(self, entity_id: int):
         async with async_session_maker() as session:
@@ -43,9 +44,10 @@ class SQLAlchemyRepository(RepositoryInterface):
 
     async def update(self, update_date: dict, entity_id: int):
         async with async_session_maker() as session:
-            stmt = update(self.model).where(self.model.id == entity_id).values(**update_date)
-            await session.execute(stmt)
+            stmt = update(self.model).returning(self.model).where(self.model.id == entity_id).values(**update_date)
+            result = await session.execute(stmt)
             await session.commit()
+            return result.scalar()
 
 
 class IntegrityException(Exception):
