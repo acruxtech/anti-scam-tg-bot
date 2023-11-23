@@ -1,6 +1,7 @@
 .idea
 .env
 Задачи.txt
+Будущий функционал.txt
 venv
 **/__pycache__/**
 **.pyc

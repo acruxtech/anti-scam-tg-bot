@@ -39,7 +39,8 @@ async def get_text_contact(message: Message, bot: Bot, state: FSMContext):
     await bot.send_message(TECH_SUPPORT_ID, text=f"Пришло сообщение от <b>{message.from_user.username}</b>:")
     contact_message = await contact_message_service.create_contact_message(message.from_user.id, message.text)
     await bot.send_message(
-        TECH_SUPPORT_ID, text=message.text, reply_markup=get_contact_answer(contact_message_id=contact_message.id)
+        TECH_SUPPORT_ID, text=f"<b>{message.from_user.username}</b>: {message.text}",
+        reply_markup=get_contact_answer(contact_message_id=contact_message.id)
     )
     await message.answer(
         "Спасибо за вопрос! Мы ответим на него как можно скорее!",
@@ -68,11 +69,12 @@ async def send_message_to_contact(message: Message, bot: Bot, state: FSMContext)
     contact_message = await contact_message_service.answer_contact_message(
         contact_message_id, message.text, message.from_user.id
     )
+    await message.answer("Ответ был отправлен пользователю  ✅")
     await bot.send_message(
-        contact_message.contact_id, text=f"Мы ответили на твой вопрос <i>\"{contact_message.message}\"</i>: "
+        contact_message.contact_id, text=f"Мы ответили на твой вопрос: <b>{contact_message.message}</b>"
     )
     await bot.send_message(
-        contact_message.contact_id, text=f"Ответ от модератора: <i>{message.text}</i>",
+        contact_message.contact_id, text=f"Ответ от модератора: <b>{message.text}</b>",
         reply_markup=get_main_menu_keyboard()
     )
     await state.clear()

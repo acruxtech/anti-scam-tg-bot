@@ -1,10 +1,11 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.repository import SQLAlchemyRepository
 from src.database import Base
+from src.entities.scammers.models import ScammerReport
 
 
 class User(Base):
@@ -18,6 +19,8 @@ class User(Base):
     is_bot: Mapped[bool] = mapped_column(nullable=True)
     datetime_first: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     datetime_last: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+
+    scammers_reports: Mapped[list[ScammerReport]] = relationship(back_populates="reported_user")
 
 
 user_repository = SQLAlchemyRepository(User)

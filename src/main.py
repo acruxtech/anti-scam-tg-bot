@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher
 from src.handlers.systems import get_start, get_stop
 from src.config import BOT_TOKEN
 from src.handlers import basic, scammer, contact
+from src.middlewares.forward import AlbumsMiddleware
 
 
 async def start():

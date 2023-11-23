@@ -36,6 +36,12 @@ class SQLAlchemyRepository(RepositoryInterface):
                 await session.commit()
                 return result.scalar()
 
+    async def get_list(self, *filters):
+        async with async_session_maker() as session:
+            stmt = select(self.model).filter(*filters)
+            result = await session.execute(stmt)
+            return result.scalars().all()
+
     async def get(self, entity_id: int):
         async with async_session_maker() as session:
             query = select(self.model).where(self.model.id == entity_id)

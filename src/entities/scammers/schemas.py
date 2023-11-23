@@ -6,3 +6,13 @@ class ScammerScheme(BaseModel):
     username: str | None = None
     first_name: str | None = None
     language_code: str | None = None
+
+
+class ScammerReportSchemeBase(BaseModel):
+    text: str
+    reported_id: int
+    scammer_id: int
+
+
+class ScammerReportSchemeCreate(ScammerReportSchemeBase):
+    pass

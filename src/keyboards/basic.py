@@ -38,6 +38,19 @@ def get_send_user_keyboard():
     )
 
 
+def get_send_media_scammer_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+
+    keyboard_builder.button(text="Отправить репорт 🚩")
+    keyboard_builder.button(text="Назад")
+
+    keyboard_builder.adjust(1)
+
+    return keyboard_builder.as_markup(
+        resize_keyboard=True, one_time_keyboard=False, input_field_placeholder="Что делаем с репортом?"
+    )
+
+
 def get_contact_cancel_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
 
