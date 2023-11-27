@@ -1,15 +1,22 @@
 from aiogram import Bot, Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from src.config import MODERATOR_ID
 
-from src.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard, get_send_media_scammer_keyboard
+from src.keyboards.basic import (
+    get_send_user_keyboard,
+    get_main_menu_keyboard,
+    get_send_media_scammer_keyboard,
+    get_contact_cancel_keyboard,
+    get_empty_keyboard
+)
 from src.keyboards.menu import get_report_message
 
-from src.entities.scammers.schemas import ScammerReportSchemeCreate
+from src.entities.scammers.schemas import ScammerReportSchemeCreate, ScammerAnsweredScheme
 from src.entities.scammers.service import scammers_service, scammers_reports_service
 from src.entities.scammers.models import scam_media_repository
 
@@ -30,6 +37,7 @@ class AddScammerForm(StatesGroup):
     get_proofs = State()
     get_media = State()
     add_scam_to_database = State()
+    get_explanation = State()
 
 
 @scammer_router.message(F.text == "Кинуть репорт  ✍")
@@ -49,7 +57,7 @@ async def back(message: Message, bot: Bot, state: FSMContext):
 @scammer_router.message(AddScammerForm.get_profile)
 async def get_scam(message: Message, bot: Bot, state: FSMContext):
     if message.user_shared or message.forward_from:
-        await message.answer("Мы получили профиль пользователя ✅")
+        await message.answer("Мы получили профиль пользователя ✅", reply_markup=get_contact_cancel_keyboard())
         scammer = get_scammer_data_from_message(message)
         scammer_from_db = await scammers_service.add_scammer(scammer)
         await state.update_data(scammer_id=scammer_from_db.id)
@@ -76,6 +84,7 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
 
     if len(media) > 0:
         scam_rep = await scammers_reports_service.get_scammer_report(scammers_reports_id)
+        scammer = await scammers_service.get_scammer(scam_rep.scammer_id)
 
         album_builder = MediaGroupBuilder(
             caption=scam_rep.text
@@ -87,9 +96,17 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
             elif media_object.type == "video":
                 album_builder.add_video(media=media_object.file_id)
 
+        if scammer.username:
+            about_scammer = f"Username = @{scammer.username} \n\n" \
+                            f"ID = <code>{scammer.id}</code>"
+        else:
+            about_scammer = f"ID = <code>{scammer.id}</code>"
+
         await bot.send_message(
             MODERATOR_ID,
-            f"Репорт от <b>{message.from_user.username}</b> на пользователя с ID = {scam_rep.scammer_id} 🛑"
+            f"Репорт от <b>@{message.from_user.username}</b> \n\n"
+            f"На пользователя: \n\n"
+            f"{about_scammer}  🛑"
         )
         await bot.send_media_group(MODERATOR_ID, album_builder.build())
         await bot.send_message(
@@ -99,7 +116,7 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
         await state.clear()
         await message.answer(
             "Ваш репорт отправился на рассмотрение...  🕒\n\n"
-            "Мы сообщим наше решение по этому делу после рассмотрения модератором  👨‍⚖",
+            "Мы сообщим наше решение по делу после рассмотрения модератором  👨‍⚖",
             reply_markup=get_main_menu_keyboard()
         )
     else:
@@ -151,27 +168,71 @@ async def ask_proofs(message: Message, bot: Bot, state: FSMContext):
 
 
 @scammer_router.callback_query(ReportMessage.filter())
-async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage):
+async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state: FSMContext):
+    await state.update_data(scammer_report_id=callback_data.id)
     if callback_data.decision:
         await bot.send_message(
             callback_data.reported_id, "Мы рассмотрели ваш репорт на пользователя и занесли его в базу! 👮‍♂\n\n"
                                        "Благодарим за помощь в борьбе с мошениками!  🤝"
         )
         await bot.edit_message_text(
-            "Мошенник добавлен в базу  ✅", call.message.chat.id, call.message.message_id
+            "Вы добавили мошенника в базу  ✅", call.message.chat.id, call.message.message_id
         )
-        await bot.edit_message_reply_markup(
-            call.message.chat.id, call.message.message_id, reply_markup=None
-        )
+        try:
+            scammer_report_answered = ScammerAnsweredScheme(
+                is_reviewed=True,
+                reviewer_id=call.message.from_user.id,
+                decision=True
+            )
+            scammer_report = await scammers_reports_service.answer_to_scammer_report(
+                callback_data.id, scammer_report_answered
+            )
+            await scammers_service.confirm(scammer_report.scammer_id)
+            await bot.edit_message_reply_markup(
+                call.message.chat.id, call.message.message_id, reply_markup=None
+            )
+        except TelegramBadRequest:
+            pass
     else:
-        await bot.send_message(
-            callback_data.reported_id, "Мы отклонили ваш репорт! Попробуйте подать новый репорт или написать "
-                                       "в тех поддержку!"
-        )
+        await call.message.answer("Напишите пользователю, почему вы отказали: ", reply_markup=None)
+        await state.update_data(reported_id=callback_data.reported_id)
         await bot.edit_message_text(
             "Вы отклонили данный репорт  ❌", call.message.chat.id, call.message.message_id
         )
-        await bot.edit_message_reply_markup(
-            call.message.chat.id, call.message.message_id, reply_markup=None
-        )
+        try:
+            await bot.edit_message_reply_markup(
+                call.message.chat.id, call.message.message_id, reply_markup=None
+            )
+        except TelegramBadRequest:
+            pass
+        await state.set_state(AddScammerForm.get_explanation)
     await call.answer()
+
+
+@scammer_router.message(AddScammerForm.get_explanation)
+async def refuse_report(message: Message, bot: Bot, state: FSMContext):
+    if len(message.text) > 0:
+        data = await state.get_data()
+        scammer_report_id = data["scammer_report_id"]
+        scammer_report_answered = ScammerAnsweredScheme(
+            is_reviewed=True,
+            reviewer_id=message.from_user.id,
+            decision=False,
+            explanation=message.text
+        )
+        updated_scammer_report = await scammers_reports_service.answer_to_scammer_report(
+            scammer_report_id, scammer_report_answered
+        )
+        await message.answer(
+            "Причина отказа была отправлена пользователю  ✅",
+            reply_markup=get_main_menu_keyboard()
+        )
+        await bot.send_message(
+            data["reported_id"],
+            f"Мы отклонили ваш репорт на пользователя c ID = <code>{updated_scammer_report.scammer_id}</code>! \n\n"
+            f"Причина отказа: <b>{message.text}</b>\n\n"
+            f"Попробуй подать новый репорт или написать в тех поддержку!"
+        )
+        await state.clear()
+    else:
+        await message.answer("Напишите текст")

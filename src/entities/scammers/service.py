@@ -1,4 +1,6 @@
-from src.entities.scammers.schemas import ScammerScheme, ScammerReportSchemeCreate
+from datetime import datetime
+
+from src.entities.scammers.schemas import ScammerScheme, ScammerReportSchemeCreate, ScammerAnsweredScheme
 from src.repository import RepositoryInterface, IntegrityException
 from src.entities.scammers.models import scammers_repository, scammers_reports_repository
 
@@ -16,8 +18,16 @@ class ScammerService:
             return await self.repository.create(scammer.model_dump())
         except IntegrityException:
             scammer_db = await self.repository.get(scammer.id)
-            data = {"id": scammer.id, "number_requests": scammer_db.number_requests + 1}
+            data = {
+                "id": scammer.id,
+                "number_requests": scammer_db.number_requests + 1
+            }
+            data.update(scammer.model_dump())
             return await scammers_repository.update(data, scammer_db.id)
+
+    async def confirm(self, scammer_id: int):
+        data = {"is_scam": True}
+        await self.repository.update(data, scammer_id)
 
 
 class ScammerReportService:
@@ -28,8 +38,21 @@ class ScammerReportService:
     async def create_scammer_report(self, scammer_report: ScammerReportSchemeCreate):
         return await self.repository.create(scammer_report.model_dump())
 
-    async def answer_to_scammer_report(self):
-        pass
+    async def answer_to_scammer_report(
+            self, scammer_report_id: int, scammer_report_answer: ScammerAnsweredScheme
+    ):
+        data = {
+            "is_reviewed": scammer_report_answer.is_reviewed,
+            "datetime_reviewed": datetime.now(),
+            "decision": scammer_report_answer.decision,
+            "reviewer_id": scammer_report_answer.reviewer_id
+        }
+
+        if scammer_report_answer.explanation is not None:
+            data.update({"explanation": scammer_report_answer.explanation})
+
+        return await self.repository.update(data, scammer_report_id)
+
     async def get_scammer_report(self, scammer_report_id: int):
         return await self.repository.get(scammer_report_id)
 

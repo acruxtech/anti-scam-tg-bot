@@ -16,3 +16,10 @@ class ScammerReportSchemeBase(BaseModel):
 
 class ScammerReportSchemeCreate(ScammerReportSchemeBase):
     pass
+
+
+class ScammerAnsweredScheme(BaseModel):
+    is_reviewed: bool
+    reviewer_id: int
+    decision: bool
+    explanation: str | None = None

@@ -36,10 +36,10 @@ async def back(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(ContactState.get_contact_text, F.text)
 async def get_text_contact(message: Message, bot: Bot, state: FSMContext):
-    await bot.send_message(TECH_SUPPORT_ID, text=f"Пришло сообщение от <b>{message.from_user.username}</b>:")
+    await bot.send_message(TECH_SUPPORT_ID, text=f"Пришло сообщение от <b>@{message.from_user.username}</b>:")
     contact_message = await contact_message_service.create_contact_message(message.from_user.id, message.text)
     await bot.send_message(
-        TECH_SUPPORT_ID, text=f"<b>{message.from_user.username}</b>: {message.text}",
+        TECH_SUPPORT_ID, text=f"<b>@{message.from_user.username}</b>: {message.text}",
         reply_markup=get_contact_answer(contact_message_id=contact_message.id)
     )
     await message.answer(
@@ -57,7 +57,7 @@ async def answer_to_contact(callback: CallbackQuery, callback_data: ContactMessa
     await callback.message.answer("Напишите сообщению пользователю:")
     await state.update_data(contact_message_id=callback_data.id)
     await state.set_state(ContactState.get_text_for_contact)
-
+    await callback.answer()
 
 F: Message
 
@@ -71,10 +71,10 @@ async def send_message_to_contact(message: Message, bot: Bot, state: FSMContext)
     )
     await message.answer("Ответ был отправлен пользователю  ✅")
     await bot.send_message(
-        contact_message.contact_id, text=f"Мы ответили на твой вопрос: <b>{contact_message.message}</b>"
-    )
-    await bot.send_message(
-        contact_message.contact_id, text=f"Ответ от модератора: <b>{message.text}</b>",
+        contact_message.contact_id, text=f"<b>Мы ответили на твой вопрос:</b> \n\n"
+                                         f"<i>{contact_message.message}</i> \n\n"
+                                         f"<b>Ответ от модератора:</b> \n\n"
+                                         f"<i>{message.text}</i>",
         reply_markup=get_main_menu_keyboard()
     )
     await state.clear()

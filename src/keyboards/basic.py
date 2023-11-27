@@ -2,7 +2,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types import KeyboardButtonRequestUser, KeyboardButton
 
 
-def get_main_menu_keyboard():
+def get_main_menu_keyboard(one_time_keyboard: bool = False):
     keyboard_builder = ReplyKeyboardBuilder()
 
     request_button = KeyboardButton(
@@ -59,5 +59,11 @@ def get_contact_cancel_keyboard():
     keyboard_builder.adjust(1)
 
     return keyboard_builder.as_markup(
-        resize_keyboard=True, one_time_keyboard=False, input_field_placeholder="Что ты хотите сказать нам?"
+        resize_keyboard=True, one_time_keyboard=False, input_field_placeholder="Что произошло?"
     )
+
+
+def get_empty_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder.adjust(1)
+    return keyboard_builder.as_markup()

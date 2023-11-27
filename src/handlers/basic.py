@@ -29,7 +29,16 @@ async def get_contact(message: Message, bot: Bot):
     else:
         scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
 
+    info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
+                         f"ID = <code>{message.user_shared.user_id}</code>"
+
+    if scammer and scammer.username:
+        info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
+
+    if scammer and scammer.first_name:
+        info_about_scammer += f"\n\nFirst Name = <code>{scammer.first_name}</code>"
+
     await message.answer(f"{scammer_message}\n\n"
-                         f"<b>Информация о пользователе:</b>\n\n"
-                         f"ID Пользователя = <code>{message.user_shared.user_id}</code>")
+                         f"{info_about_scammer}")
+
     
