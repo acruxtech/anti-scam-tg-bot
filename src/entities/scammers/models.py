@@ -12,11 +12,11 @@ class ScammerReport(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     text: Mapped[str] = mapped_column(nullable=True)
-    datetime_reported: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    datetime_reported: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     is_reviewed: Mapped[bool] = mapped_column(default=False)
     reviewer_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
-    datetime_reviewed: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    datetime_reviewed: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     explanation: Mapped[str] = mapped_column(nullable=True)
     decision: Mapped[bool] = mapped_column(nullable=True)
 
@@ -35,8 +35,8 @@ class Scammer(Base):
     username: Mapped[str] = mapped_column(nullable=True)
     first_name: Mapped[str] = mapped_column(nullable=True)
     language_code: Mapped[str] = mapped_column(nullable=True)
-    datetime_first: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    datetime_confirmed: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    datetime_first: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    datetime_confirmed: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     number_requests: Mapped[int] = mapped_column(default=1)
     is_scam: Mapped[bool] = mapped_column(default=False, nullable=True)
 

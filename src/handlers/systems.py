@@ -1,8 +1,7 @@
 from aiogram import Bot
 
-from src.config import ADMIN_ID
-
-from src.utils.commands import set_commands
+from ..config import ADMIN_ID
+from ..utils.commands import set_commands
 
 
 async def get_start(bot: Bot):
