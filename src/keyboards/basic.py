@@ -1,8 +1,10 @@
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types import KeyboardButtonRequestUser, KeyboardButton
 
+from src.config import OWNER_IDS
 
-def get_main_menu_keyboard(one_time_keyboard: bool = False):
+
+def get_main_menu_keyboard(user_id: int):
     keyboard_builder = ReplyKeyboardBuilder()
 
     request_button = KeyboardButton(
@@ -13,7 +15,11 @@ def get_main_menu_keyboard(one_time_keyboard: bool = False):
     keyboard_builder.button(text="Кинуть репорт  ✍")
     keyboard_builder.button(text="Связаться с нами  📞")
 
-    keyboard_builder.adjust(1, 2)
+    if user_id in OWNER_IDS:
+        keyboard_builder.button(text="Зайти в админку  📊")
+        keyboard_builder.adjust(1, 2, 1)
+    else:
+        keyboard_builder.adjust(1, 2)
 
     return keyboard_builder.as_markup(
         resize_keyboard=True, one_time_keyboard=False, input_field_placeholder="Выбери действие..."

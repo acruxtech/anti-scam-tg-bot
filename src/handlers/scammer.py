@@ -50,7 +50,7 @@ async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
 
 @scammer_router.message(F.text == "Назад")
 async def back(message: Message, bot: Bot, state: FSMContext):
-    await message.answer("Возвращаю в главное меню...", reply_markup=get_main_menu_keyboard())
+    await message.answer("Возвращаю в главное меню...", reply_markup=get_main_menu_keyboard(message.from_user.id))
     await state.clear()
 
 
@@ -117,7 +117,7 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
         await message.answer(
             "Ваш репорт отправился на рассмотрение...  🕒\n\n"
             "Мы сообщим наше решение по делу после рассмотрения модератором  👨‍⚖",
-            reply_markup=get_main_menu_keyboard()
+            reply_markup=get_main_menu_keyboard(message.from_user.id)
         )
     else:
         await message.answer("Загрузи хотя бы 1 фотографию или видео")
@@ -225,7 +225,7 @@ async def refuse_report(message: Message, bot: Bot, state: FSMContext):
         )
         await message.answer(
             "Причина отказа была отправлена пользователю  ✅",
-            reply_markup=get_main_menu_keyboard()
+            reply_markup=get_main_menu_keyboard(message.from_user.id)
         )
         await bot.send_message(
             data["reported_id"],

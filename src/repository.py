@@ -7,6 +7,10 @@ from src.database import async_session_maker, Base
 
 
 class RepositoryInterface:
+
+    def __init__(self, model):
+        self.model = model
+
     @abstractmethod
     async def create(self, data: dict):
         raise NotImplemented
@@ -17,6 +21,10 @@ class RepositoryInterface:
 
     @abstractmethod
     async def get(self, entity_id: int):
+        raise NotImplemented
+
+    @abstractmethod
+    async def get_list(self, *filters):
         raise NotImplemented
 
 

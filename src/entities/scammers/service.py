@@ -10,6 +10,9 @@ class ScammerService:
     def __init__(self, repository: RepositoryInterface):
         self.repository = repository
 
+    async def get_scammer_list(self):
+        return await self.repository.get_list(self.repository.model.is_scam == True)
+
     async def get_scammer(self, user_id: int):
         return await self.repository.get(user_id)
 
@@ -26,7 +29,7 @@ class ScammerService:
             return await scammers_repository.update(data, scammer_db.id)
 
     async def confirm(self, scammer_id: int):
-        data = {"is_scam": True}
+        data = {"is_scam": True, "datetime_confirmed": datetime.now()}
         await self.repository.update(data, scammer_id)
 
 

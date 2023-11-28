@@ -15,7 +15,7 @@ F: Message
 
 @basic_router.message(Command("start"))
 async def start(message: Message, bot: Bot):
-    await message.answer(get_start_message(message), reply_markup=get_main_menu_keyboard())
+    await message.answer(get_start_message(message), reply_markup=get_main_menu_keyboard(message.from_user.id))
     user = UserScheme(**message.from_user.model_dump())
     await user_service.add_user(user)
 

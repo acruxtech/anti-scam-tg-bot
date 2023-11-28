@@ -6,3 +6,4 @@ alembic
 pydantic
 cachetools
 aioschedule
+openpyxl

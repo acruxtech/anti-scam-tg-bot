@@ -30,7 +30,7 @@ async def start_contact(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(ContactState.get_contact_text, F.text == "Назад")
 async def back(message: Message, bot: Bot, state: FSMContext):
-    await message.answer("Возвращаю в главное меню...", reply_markup=get_main_menu_keyboard())
+    await message.answer("Возвращаю в главное меню...", reply_markup=get_main_menu_keyboard(message.from_user.id))
     await state.clear()
 
 
@@ -44,7 +44,7 @@ async def get_text_contact(message: Message, bot: Bot, state: FSMContext):
     )
     await message.answer(
         "Спасибо за вопрос! Мы ответим на него как можно скорее!",
-        reply_markup=get_main_menu_keyboard()
+        reply_markup=get_main_menu_keyboard(message.from_user.id)
     )
     await state.clear()
 
@@ -75,6 +75,6 @@ async def send_message_to_contact(message: Message, bot: Bot, state: FSMContext)
                                          f"<i>{contact_message.message}</i> \n\n"
                                          f"<b>Ответ от модератора:</b> \n\n"
                                          f"<i>{message.text}</i>",
-        reply_markup=get_main_menu_keyboard()
+        reply_markup=get_main_menu_keyboard(message.from_user.id)
     )
     await state.clear()

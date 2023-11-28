@@ -5,8 +5,7 @@ from aiogram import Bot, Dispatcher
 
 from src.handlers.systems import get_start, get_stop
 from src.config import BOT_TOKEN
-from src.handlers import basic, scammer, contact
-from src.middlewares.forward import AlbumsMiddleware
+from src.handlers import basic, scammer, contact, admin
 
 
 async def start():
@@ -19,6 +18,7 @@ async def start():
 
     dp = Dispatcher()
 
+    dp.include_router(admin.router)
     dp.include_router(scammer.scammer_router)
     dp.include_router(basic.basic_router)
     dp.include_router(contact.router)
