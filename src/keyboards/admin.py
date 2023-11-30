@@ -5,7 +5,7 @@ def get_admin_inline_keyboard():
     inline_keyboard_builder = InlineKeyboardBuilder()
 
     inline_keyboard_builder.button(
-        text="Добавить скамера  ➕", callback_data="add_scamer"
+        text="Добавить скамера  ➕", callback_data="add_scammer"
     )
     inline_keyboard_builder.button(
         text="Удалить скамера  ➖", callback_data="delete_scammer"

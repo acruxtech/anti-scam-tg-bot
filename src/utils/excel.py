@@ -62,6 +62,6 @@ async def create_list_scammer():
     for i in range(1, ws.max_column + 1):
         ws.column_dimensions[get_column_letter(i)].width = column_widths[i - 1]
 
-    filename = "TEST.xlsx"
+    filename = "Список скамеров.xlsx"
     wb.save(filename)
     return filename

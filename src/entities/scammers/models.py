@@ -20,8 +20,9 @@ class ScammerReport(Base):
     explanation: Mapped[str] = mapped_column(nullable=True)
     decision: Mapped[bool] = mapped_column(nullable=True)
 
+    message_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
     reported_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id"))
+    scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id", ondelete="CASCADE"))
 
     reported_user: Mapped["User"] = relationship(back_populates="scammers_reports")
     scammer: Mapped["Scammer"] = relationship(back_populates="scammers_reports")
@@ -50,7 +51,7 @@ class ScammerMedia(Base):
     type: Mapped[str] = mapped_column()
     file_id: Mapped[str] = mapped_column()
 
-    scammers_reports_id: Mapped[int] = mapped_column(ForeignKey("scammers_reports.id"))
+    scammers_reports_id: Mapped[int] = mapped_column(ForeignKey("scammers_reports.id", ondelete="CASCADE"))
     scammers_reports: Mapped[ScammerReport] = relationship(back_populates="scammer_media")
 
 

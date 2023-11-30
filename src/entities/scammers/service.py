@@ -32,11 +32,17 @@ class ScammerService:
         data = {"is_scam": True, "datetime_confirmed": datetime.now()}
         await self.repository.update(data, scammer_id)
 
+    async def delete_scammer(self, scammer_id: int):
+        return await self.repository.delete(scammer_id)
+
 
 class ScammerReportService:
 
     def __init__(self, repository: RepositoryInterface):
         self.repository = repository
+
+    async def update_scammer_report(self, scammer_report_id: int, message_id: int):
+        pass
 
     async def create_scammer_report(self, scammer_report: ScammerReportSchemeCreate):
         return await self.repository.create(scammer_report.model_dump())

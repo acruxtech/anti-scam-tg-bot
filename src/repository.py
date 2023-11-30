@@ -27,6 +27,10 @@ class RepositoryInterface:
     async def get_list(self, *filters):
         raise NotImplemented
 
+    @abstractmethod
+    async def delete(self, model_id: int):
+        raise NotImplemented
+
 
 class SQLAlchemyRepository(RepositoryInterface):
 
@@ -59,6 +63,13 @@ class SQLAlchemyRepository(RepositoryInterface):
     async def update(self, update_date: dict, entity_id: int):
         async with async_session_maker() as session:
             stmt = update(self.model).returning(self.model).where(self.model.id == entity_id).values(**update_date)
+            result = await session.execute(stmt)
+            await session.commit()
+            return result.scalar()
+
+    async def delete(self, model_id: int):
+        async with async_session_maker() as session:
+            stmt = delete(self.model).returning(self.model).where(self.model.id == model_id)
             result = await session.execute(stmt)
             await session.commit()
             return result.scalar()
