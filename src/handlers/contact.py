@@ -36,7 +36,10 @@ async def back(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(ContactState.get_contact_text, F.text)
 async def get_text_contact(message: Message, bot: Bot, state: FSMContext):
-    await bot.send_message(TECH_SUPPORT_ID, text=f"Пришло сообщение от <b>@{message.from_user.username}</b>:")
+    await bot.send_message(
+        TECH_SUPPORT_ID,
+        text=f"Пришло сообщение от <b>@{message.from_user.username}</b>:"
+    )
     contact_message = await contact_message_service.create_contact_message(message.from_user.id, message.text)
     await bot.send_message(
         TECH_SUPPORT_ID, text=f"<b>@{message.from_user.username}</b>: {message.text}",

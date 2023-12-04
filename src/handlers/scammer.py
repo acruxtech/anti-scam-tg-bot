@@ -108,8 +108,9 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
             f"На пользователя: \n\n"
             f"{about_scammer}  🛑"
         )
-        messages = await bot.send_media_group(MODERATOR_ID, album_builder.build())[0]
-        print("id сообщения =", messages.message_id)
+        messages = await bot.send_media_group(MODERATOR_ID, album_builder.build())
+        message_ = messages[0]
+        print("id сообщения =", message_.message_id)
         await bot.send_message(
             MODERATOR_ID, "Выберите действие:",
             reply_markup=get_report_message(message.from_user.id, scammers_reports_id)
@@ -171,7 +172,7 @@ async def ask_proofs(message: Message, bot: Bot, state: FSMContext):
 @scammer_router.callback_query(ReportMessage.filter())
 async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state: FSMContext):
     await state.update_data(scammer_report_id=callback_data.id)
-    await scammers_reports_service.update_scammer_report(callback_data.id, m)
+    await scammers_reports_service.update_scammer_report(callback_data.id, call.message.message_id)
     if callback_data.decision:
         await bot.send_message(
             callback_data.reported_id, "Мы рассмотрели ваш репорт на пользователя и занесли его в базу! 👮‍♂\n\n"
