@@ -12,9 +12,9 @@ connection_string = URL.create(
   username=DB_USER,
   password=DB_PASS,
   host=DB_HOST,
-  database=DB_NAME,
-  port=DB_PORT
+  database=DB_NAME
 )
+
 
 Base = declarative_base()
 
