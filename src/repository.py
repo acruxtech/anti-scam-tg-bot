@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from src.database import async_session_maker, Base
 
 
-class RepositoryInterface:
+class RepositoryInterface(ABC):
 
     def __init__(self, model):
         self.model = model
@@ -47,6 +47,17 @@ class SQLAlchemyRepository(RepositoryInterface):
             else:
                 await session.commit()
                 return result.scalar()
+
+    async def create_many(self, data: list):
+        async with async_session_maker() as session:
+            stmt = insert(self.model).returning(self.model).values(data)
+            try:
+                result = await session.execute(stmt)
+            except IntegrityError:
+                raise IntegrityException
+            else:
+                await session.commit()
+                return result
 
     async def get_list(self, *filters):
         async with async_session_maker() as session:

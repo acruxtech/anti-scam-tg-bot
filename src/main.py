@@ -6,6 +6,10 @@ from aiogram import Bot, Dispatcher
 from src.handlers.systems import get_start, get_stop
 from src.config import BOT_TOKEN
 from src.handlers import basic, scammer, contact, admin
+from src.entities.scammers.service import scammers_repository
+
+from data import scammer_ids
+from src.repository import IntegrityException
 
 
 async def start():
@@ -13,6 +17,15 @@ async def start():
         level=logging.INFO,
         format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"
     )
+
+    scammers = [
+        {"id": scammer_id, "is_scam": True, "number_requests": 1} for scammer_id in scammer_ids
+    ]
+
+    try:
+        await scammers_repository.create_many(scammers)
+    except IntegrityException:
+        print("Скамеры уже добавлены в базу")
 
     bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
 

@@ -1,5 +1,5 @@
 from aiogram import Bot, Router, F
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile
 from aiogram.filters import Command
 
 from src.messages import get_start_message
@@ -15,7 +15,12 @@ F: Message
 
 @basic_router.message(Command("start"))
 async def start(message: Message, bot: Bot):
-    await message.answer(get_start_message(message), reply_markup=get_main_menu_keyboard(message.from_user.id))
+    photo_path = r"./media/systems/menu.png"
+    await message.answer_photo(
+        FSInputFile(photo_path),
+        caption=get_start_message(message),
+        reply_markup=get_main_menu_keyboard(message.from_user.id)
+    )
     user = UserScheme(**message.from_user.model_dump())
     await user_service.add_user(user)
 
