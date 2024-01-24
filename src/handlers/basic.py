@@ -29,7 +29,7 @@ async def start(message: Message, bot: Bot):
 async def get_contact(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)
 
-    if scammer:
+    if scammer and scammer.is_scam:
         scammer_message = "Этот пользователь - скаммер!   ❌"
     else:
         scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"

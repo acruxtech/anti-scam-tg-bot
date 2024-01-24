@@ -197,7 +197,6 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
         except TelegramBadRequest:
             pass
     else:
-        await call.message.answer("Напишите пользователю, почему вы отказали: ", reply_markup=None)
         await state.update_data(reported_id=callback_data.reported_id)
         await bot.edit_message_text(
             "Вы отклонили данный репорт  ❌", call.message.chat.id, call.message.message_id
@@ -206,9 +205,13 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
             await bot.edit_message_reply_markup(
                 call.message.chat.id, call.message.message_id, reply_markup=None
             )
+            await bot.send_message(
+                callback_data.reported_id,
+                f"Мы отклонили ваш репорт на пользователя! \n\n"
+                f"Попробуйте подать новый репорт или написать в тех поддержку!"
+            )
         except TelegramBadRequest:
             pass
-        await state.set_state(AddScammerForm.get_explanation)
     await call.answer()
 
 
