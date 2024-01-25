@@ -42,7 +42,6 @@ async def create_list_scammer():
         else:
             cell.value = "Не подтверждено"
             cell.fill = redFill
-        ws.cell(row=index, column=5, value=scammer.datetime_confirmed)
         index += 1
 
     column_widths = []
