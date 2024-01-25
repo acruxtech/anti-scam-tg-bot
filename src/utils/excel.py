@@ -26,9 +26,7 @@ async def create_list_scammer():
     ws.cell(row=1, column=2, value="ID")
     ws.cell(row=1, column=3, value="Username")
     ws.cell(row=1, column=4, value="First Name")
-    ws.cell(row=1, column=5, value="Первое появления в БД")
-    ws.cell(row=1, column=6, value="Подтверждено")
-    ws.cell(row=1, column=7, value="Время подтверждения")
+    ws.cell(row=1, column=5, value="Подтверждено")
 
     index = 2
     scammer: Scammer
@@ -37,20 +35,19 @@ async def create_list_scammer():
         ws.cell(row=index, column=2, value=scammer.id)
         ws.cell(row=index, column=3, value=scammer.username)
         ws.cell(row=index, column=4, value=scammer.first_name)
-        ws.cell(row=index, column=5, value=scammer.datetime_first)
-        cell = ws.cell(row=index, column=6)
+        cell = ws.cell(row=index, column=5)
         if scammer.is_scam:
             cell.value = "Да"
             cell.fill = greenFill
         else:
             cell.value = "Не подтверждено"
             cell.fill = redFill
-        ws.cell(row=index, column=7, value=scammer.datetime_confirmed)
+        ws.cell(row=index, column=5, value=scammer.datetime_confirmed)
         index += 1
 
     column_widths = []
 
-    for col_cells in ws.iter_cols(min_col=1, max_col=7):
+    for col_cells in ws.iter_cols(min_col=1, max_col=5):
         cell_lens = []
         cell: Cell
         for cell in col_cells:

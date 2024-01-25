@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Bot, Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import State, StatesGroup
@@ -19,6 +21,7 @@ from src.keyboards.menu import get_report_message
 from src.entities.scammers.schemas import ScammerReportSchemeCreate, ScammerAnsweredScheme
 from src.entities.scammers.service import scammers_service, scammers_reports_service
 from src.entities.scammers.models import scam_media_repository
+from src.repository import IntegrityException
 
 from src.utils.callbacks import ReportMessage
 from src.utils.scammers import get_scammer_data_from_message
@@ -59,7 +62,14 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
     if message.user_shared or message.forward_from:
         await message.answer("Мы получили профиль пользователя ✅", reply_markup=get_contact_cancel_keyboard())
         scammer = get_scammer_data_from_message(message)
-        scammer_from_db = await scammers_service.add_scammer(scammer)
+
+        try:
+            scammer_from_db = await scammers_service.add_scammer(scammer)
+        except IntegrityException as e:
+            scammer_from_db = await scammers_service.get_scammer(scammer.id)
+            print("Пользователь уже числится в скаммерах")
+            print(e)
+
         await state.update_data(scammer_id=scammer_from_db.id)
         await message.answer("Распиши ситуацию, которая произошла у тебя со скаммером:")
         await state.set_state(AddScammerForm.get_proofs)
@@ -197,6 +207,11 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
         except TelegramBadRequest:
             pass
     else:
+        await bot.send_message(
+            callback_data.reported_id,
+            f"Мы отклонили ваш репорт на пользователя! \n\n"
+            f"Попробуйте подать новый репорт или написать в тех поддержку!"
+        )
         await state.update_data(reported_id=callback_data.reported_id)
         await bot.edit_message_text(
             "Вы отклонили данный репорт  ❌", call.message.chat.id, call.message.message_id
@@ -204,11 +219,6 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
         try:
             await bot.edit_message_reply_markup(
                 call.message.chat.id, call.message.message_id, reply_markup=None
-            )
-            await bot.send_message(
-                callback_data.reported_id,
-                f"Мы отклонили ваш репорт на пользователя! \n\n"
-                f"Попробуйте подать новый репорт или написать в тех поддержку!"
             )
         except TelegramBadRequest:
             pass
