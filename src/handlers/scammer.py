@@ -147,6 +147,9 @@ async def get_video(message: Message, bot: Bot, state: FSMContext):
             "scammers_reports_id": scam_report_id
         }
     )
+    await message.edit_reply_markup(
+        reply_markup=get_send_media_scammer_keyboard()
+    )
 
 
 @scammer_router.message(AddScammerForm.get_media, F.photo)
@@ -160,6 +163,9 @@ async def get_photo(message: Message, bot: Bot, state: FSMContext):
             "type": "photo",
             "scammers_reports_id": scam_report_id
         }
+    )
+    await message.edit_reply_markup(
+        reply_markup=get_send_media_scammer_keyboard()
     )
 
 
