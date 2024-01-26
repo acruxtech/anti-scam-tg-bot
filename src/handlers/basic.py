@@ -86,3 +86,36 @@ async def get_scammer_id(message: Message, state: FSMContext):
                              f"{info_about_scammer}")
 
         await state.clear()
+
+
+@basic_router.message(F.text == "Проверить по Username")
+async def get_text_contact(message: Message, state: FSMContext):
+    await message.answer("Введите Username пользователя:")
+    await state.set_state(ScammerSearchState.get_scammer_username)
+
+
+@basic_router.message(ScammerSearchState.get_scammer_username)
+async def get_scammer_username(message: Message, state: FSMContext):
+    scammer = await scammers_service.get_scammer_by_username(message.text)
+
+    info_about_scammer = ""
+
+    if scammer and scammer.is_scam:
+
+        info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
+                             f"ID = <code>{scammer.id}</code>"
+
+        scammer_message = "Этот пользователь - скаммер!   ❌"
+        if scammer.username:
+            info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
+
+        if scammer.first_name:
+            info_about_scammer += f"\n\nFirst Name = <code>{scammer.first_name}</code>"
+    else:
+        scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
+
+    await message.answer(f"{scammer_message}\n\n"
+                         f"{info_about_scammer}")
+
+    await state.clear()
+
