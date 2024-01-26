@@ -16,6 +16,9 @@ class ScammerService:
     async def get_scammer(self, user_id: int):
         return await self.repository.get(user_id)
 
+    async def get_scammer_by_username(self, username: str):
+        return await self.repository.get_by_username(username)
+
     async def add_scammer(self, scammer: ScammerScheme):
         try:
             return await self.repository.create(scammer.model_dump())

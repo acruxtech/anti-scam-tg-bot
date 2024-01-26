@@ -31,6 +31,10 @@ class RepositoryInterface(ABC):
     async def delete(self, model_id: int):
         raise NotImplemented
 
+    @abstractmethod
+    async def get_by_username(self, username: str):
+        raise NotImplemented
+
 
 class SQLAlchemyRepository(RepositoryInterface):
 
@@ -68,6 +72,12 @@ class SQLAlchemyRepository(RepositoryInterface):
     async def get(self, entity_id: int):
         async with async_session_maker() as session:
             query = select(self.model).where(self.model.id == entity_id)
+            result = await session.execute(query)
+            return result.scalar()
+
+    async def get_by_username(self, username: str):
+        async with async_session_maker() as session:
+            query = select(self.model).where(self.model.username == username)
             result = await session.execute(query)
             return result.scalar()
 
