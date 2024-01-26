@@ -12,6 +12,8 @@ def get_main_menu_keyboard(user_id: int):
     )
 
     keyboard_builder.add(request_button)
+    keyboard_builder.button(text="Проверить по ID")
+    keyboard_builder.button(text="Проверить по Username")
     keyboard_builder.button(text="Кинуть репорт  ✍")
     keyboard_builder.button(text="Связаться с нами  📞")
 
