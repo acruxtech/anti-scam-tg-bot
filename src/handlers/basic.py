@@ -59,6 +59,12 @@ async def get_text_contact(message: Message, state: FSMContext):
     await state.set_state(ScammerSearchState.get_scammer_id)
 
 
+@basic_router.message(F.text == "Проверить по Username")
+async def get_text_contact(message: Message, state: FSMContext):
+    await message.answer("Введите Username пользователя:")
+    await state.set_state(ScammerSearchState.get_scammer_username)
+
+
 @basic_router.message(ScammerSearchState.get_scammer_id)
 async def get_scammer_id(message: Message, state: FSMContext):
     try:
@@ -86,12 +92,6 @@ async def get_scammer_id(message: Message, state: FSMContext):
                              f"{info_about_scammer}")
 
         await state.clear()
-
-
-@basic_router.message(F.text == "Проверить по Username")
-async def get_text_contact(message: Message, state: FSMContext):
-    await message.answer("Введите Username пользователя:")
-    await state.set_state(ScammerSearchState.get_scammer_username)
 
 
 @basic_router.message(ScammerSearchState.get_scammer_username)
