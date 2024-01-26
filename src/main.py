@@ -8,7 +8,7 @@ from src.config import BOT_TOKEN
 from src.handlers import basic, scammer, contact, admin
 from src.entities.scammers.service import scammers_repository
 
-from data import scammer_ids
+from data import scammer_ids_and_usernames
 from src.repository import IntegrityException
 
 
@@ -18,13 +18,10 @@ async def start():
         format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"
     )
 
-    scammers = [
-        {"id": scammer_id, "is_scam": True, "number_requests": 1} for scammer_id in scammer_ids
-    ]
-
     try:
-        await scammers_repository.create_many(scammers)
-    except IntegrityException:
+        await scammers_repository.create_many(scammer_ids_and_usernames)
+    except IntegrityException as e:
+        print(e)
         print("Скамеры уже добавлены в базу")
 
     bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
