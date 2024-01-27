@@ -3,11 +3,15 @@ from aiogram.types import Message
 
 def get_start_message(message: Message) -> str:
     start_message = f"""
-Наш надёжный <b>AntiSkamBot</b> служит мощным инструментом для проверки достоверности исполнителя услуг.
+<b>AntiSkamBot</b> – твой <b>незаменимый помощник</b> во время работы в телеграмме. 
 
-Узнавай больше про ТГ: @keroytg
+<b>Проверяй</b> исполнителя услуг на честность <b>с помощью нашего бота.</b>
 
-Чат партнеров – <a href="https://t.me/+qNqoUOqi3-gzM2Yy">Админские Веселья</a>
+<b>Узнавай больше про ТГ:</b> @keroytg / Rakhimov ВЕЩАЕТ (https://t.me/+PXCfc4FyhMVjMzQ6)
+
+<b>Агентство</b> – Space Agency (https://t.me/spaceagency1)
+
+<b>Чат партнеров</b> – Админские Веселья (https://t.me/+qNqoUOqi3-gzM2Yy)
 """
     return start_message
 
