@@ -76,7 +76,7 @@ async def get_text_contact(message: Message, state: FSMContext):
 
 
 @basic_router.message(ScammerSearchState.get_scammer_id)
-async def get_scammer_id(message: Message, state: FSMContext):
+async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
     try:
         scammer_id = int(message.text)
     except ValueError as e:
@@ -88,7 +88,10 @@ async def get_scammer_id(message: Message, state: FSMContext):
         info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
                              f"ID = <code>{scammer_id}</code>"
 
+        proof = None
+
         if scammer and scammer.is_scam:
+            proof = await proof_repository.get_by_scammer_id(scammer.id)
             scammer_message = "Этот пользователь - мошенник!   ❌"
             if scammer.username:
                 info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
@@ -102,6 +105,9 @@ async def get_scammer_id(message: Message, state: FSMContext):
                              f"{info_about_scammer}")
 
         await state.clear()
+
+        if proof:
+            await create_media(scammer, proof, message, bot)
 
 
 @basic_router.message(ScammerSearchState.get_scammer_username)
