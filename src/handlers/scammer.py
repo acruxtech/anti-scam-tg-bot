@@ -14,13 +14,12 @@ from src.keyboards.basic import (
     get_main_menu_keyboard,
     get_send_media_scammer_keyboard,
     get_contact_cancel_keyboard,
-    get_empty_keyboard
 )
 from src.keyboards.menu import get_report_message
 
 from src.entities.scammers.schemas import ScammerReportSchemeCreate, ScammerAnsweredScheme
 from src.entities.scammers.service import scammers_service, scammers_reports_service
-from src.entities.scammers.models import scam_media_repository
+from src.entities.scammers.models import scam_media_repository, proof_repository
 from src.repository import IntegrityException
 
 from src.utils.callbacks import ReportMessage
@@ -121,6 +120,12 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
         messages = await bot.send_media_group(MODERATOR_ID, album_builder.build())
         message_ = messages[0]
         print("id сообщения =", message_.message_id)
+        await proof_repository.create(
+            {
+                "scammer_id": scammer.id,
+                "message_id": message_.message_id
+            }
+        )
         await bot.send_message(
             MODERATOR_ID, "Выберите действие:",
             reply_markup=get_report_message(message.from_user.id, scammers_reports_id)

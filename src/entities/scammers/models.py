@@ -42,6 +42,7 @@ class Scammer(Base):
     is_scam: Mapped[bool] = mapped_column(default=False, nullable=True)
 
     scammers_reports: Mapped[list[ScammerReport]] = relationship(back_populates="scammer")
+    proofs: Mapped[list["Proof"]] = relationship(back_populates="scammer")
 
 
 class ScammerMedia(Base):
@@ -55,8 +56,20 @@ class ScammerMedia(Base):
     scammers_reports: Mapped[ScammerReport] = relationship(back_populates="scammer_media")
 
 
+class Proof(Base):
+    __tablename__ = "proofs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    message_id: Mapped[str] = mapped_column()
+    scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id", ondelete="CASCADE"))
+
+    scammer: Mapped["Scammer"] = relationship(back_populates="proofs")
+
+
 scammers_repository = SQLAlchemyRepository(Scammer)
 
 scammers_reports_repository = SQLAlchemyRepository(ScammerReport)
 
 scam_media_repository = SQLAlchemyRepository(ScammerMedia)
+
+proof_repository = SQLAlchemyRepository(Proof)
