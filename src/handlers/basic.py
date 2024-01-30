@@ -35,7 +35,7 @@ async def get_contact(message: Message, bot: Bot):
                          f"ID = <code>{message.user_shared.user_id}</code>"
 
     if scammer and scammer.is_scam:
-        scammer_message = "Этот пользователь - скаммер!   ❌"
+        scammer_message = "Этот пользователь - мошенник!   ❌"
         if scammer.username:
             info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
 
@@ -79,7 +79,7 @@ async def get_scammer_id(message: Message, state: FSMContext):
                              f"ID = <code>{scammer_id}</code>"
 
         if scammer and scammer.is_scam:
-            scammer_message = "Этот пользователь - скаммер!   ❌"
+            scammer_message = "Этот пользователь - мошенник!   ❌"
             if scammer.username:
                 info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
 
@@ -106,7 +106,7 @@ async def get_scammer_username(message: Message, state: FSMContext):
         info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
                              f"ID = <code>{scammer.id}</code>"
 
-        scammer_message = "Этот пользователь - скаммер!   ❌"
+        scammer_message = "Этот пользователь - мошенник!   ❌"
         if scammer.username:
             info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
 

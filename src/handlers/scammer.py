@@ -194,7 +194,7 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
     if callback_data.decision:
         await bot.send_message(
             callback_data.reported_id, "Мы рассмотрели ваш репорт на пользователя и занесли его в базу! 👮‍♂\n\n"
-                                       "Благодарим за помощь в борьбе с мошениками!  🤝"
+                                       "Благодарим за помощь в борьбе с мошенниками!  🤝"
         )
         await bot.edit_message_text(
             "Вы добавили мошенника в базу  ✅", call.message.chat.id, call.message.message_id
