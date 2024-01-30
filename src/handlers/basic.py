@@ -9,6 +9,7 @@ from src.keyboards.basic import get_main_menu_keyboard
 from src.entities.users.schemas import UserScheme
 from src.entities.users.service import user_service
 from src.entities.scammers.service import scammers_service
+from src.entities.scammers.models import proof_repository
 
 basic_router = Router()
 
@@ -30,6 +31,10 @@ async def start(message: Message, bot: Bot):
 @basic_router.message(F.user_shared)
 async def get_contact(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)
+
+    proof = await proof_repository.get_scammer_proof(scammer.id)
+
+    print(proof)
 
     info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
                          f"ID = <code>{message.user_shared.user_id}</code>"
