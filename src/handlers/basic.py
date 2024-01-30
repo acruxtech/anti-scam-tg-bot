@@ -32,12 +32,14 @@ async def start(message: Message, bot: Bot):
 async def get_contact(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)
 
-    proof = await proof_repository.get_by_scammer_id(scammer.id)
+    proof = None
 
     info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
                          f"ID = <code>{message.user_shared.user_id}</code>"
 
     if scammer and scammer.is_scam:
+        proof = await proof_repository.get_by_scammer_id(scammer.id)
+
         scammer_message = "Этот пользователь - мошенник!   ❌"
         if scammer.username:
             info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
