@@ -54,10 +54,6 @@ async def get_contact(message: Message, bot: Bot):
                          f"{info_about_scammer}")
 
     if proof:
-        await bot.forward_message(
-            chat_id=message.from_user.id, from_chat_id=proof.chat_id, message_id=proof.message_id,
-        )
-
         media = await scam_media_repository.get_list(
             scam_media_repository.model.scammer_id == scammer.id
         )
