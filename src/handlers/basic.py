@@ -32,9 +32,9 @@ async def start(message: Message, bot: Bot):
 async def get_contact(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)
 
-    proof = await proof_repository.get_scammer_proof(scammer.id)
+    proof = await proof_repository.get_by_scammer_id(scammer.id)
 
-    print(proof)
+    print(proof.message_id)
 
     info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
                          f"ID = <code>{message.user_shared.user_id}</code>"

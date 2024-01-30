@@ -75,6 +75,12 @@ class SQLAlchemyRepository(RepositoryInterface):
             result = await session.execute(query)
             return result.scalar()
 
+    async def get_by_scammer_id(self, scammer_id: int):
+        async with async_session_maker() as session:
+            query = select(self.model).where(self.model.scammer_id == scammer_id)
+            result = await session.execute(query)
+            return result.scalar()
+
     async def get_by_username(self, username: str):
         async with async_session_maker() as session:
             query = select(self.model).where(self.model.username == username)
