@@ -125,6 +125,7 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
             {
                 "scammer_id": scammer.id,
                 "message_id": message_.message_id,
+                "text": scam_rep.text,
                 "chat_id": message_.chat.id
             }
         )

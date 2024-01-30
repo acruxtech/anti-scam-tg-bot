@@ -63,6 +63,7 @@ class Proof(Base):
     __tablename__ = "proofs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    text: Mapped[str] = mapped_column()
     chat_id: Mapped[int] = mapped_column(BigInteger)
     message_id: Mapped[int] = mapped_column()
     scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id", ondelete="CASCADE"))
