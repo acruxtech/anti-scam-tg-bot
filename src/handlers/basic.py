@@ -3,13 +3,14 @@ from aiogram.types import Message, FSInputFile
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.utils.media_group import MediaGroupBuilder
 
 from src.messages import get_start_message
 from src.keyboards.basic import get_main_menu_keyboard
 from src.entities.users.schemas import UserScheme
 from src.entities.users.service import user_service
 from src.entities.scammers.service import scammers_service
-from src.entities.scammers.models import proof_repository
+from src.entities.scammers.models import proof_repository, scam_media_repository
 
 basic_router = Router()
 
@@ -57,7 +58,22 @@ async def get_contact(message: Message, bot: Bot):
             chat_id=message.from_user.id, from_chat_id=proof.chat_id, message_id=proof.message_id,
         )
 
-        await bot.send_media_group(chat_id=message.from_user.id, media=proof.media_group)
+        media = await scam_media_repository.get_list(
+            scam_media_repository.model.scammer_id == scammer.id
+        )
+
+        if len(media) > 0:
+            album_builder = MediaGroupBuilder(
+                caption=proof.text
+            )
+
+            for media_object in media:
+                if media_object.type == "photo":
+                    album_builder.add_photo(media=media_object.file_id)
+                elif media_object.type == "video":
+                    album_builder.add_video(media=media_object.file_id)
+
+            await bot.send_media_group(message.chat.id, album_builder.build())
 
 
 class ScammerSearchState(StatesGroup):
