@@ -125,7 +125,7 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
             {
                 "scammer_id": scammer.id,
                 "message_id": message_.message_id,
-                "scammers_reports_id": scammers_reports_id
+                "chat_id": message_.chat.id
             }
         )
         await bot.send_message(
