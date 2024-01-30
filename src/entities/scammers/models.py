@@ -41,6 +41,7 @@ class Scammer(Base):
     number_requests: Mapped[int] = mapped_column(default=1)
     is_scam: Mapped[bool] = mapped_column(default=False, nullable=True)
 
+    scammer_media: Mapped[list["ScammerMedia"]] = relationship(back_populates="scammer")
     scammers_reports: Mapped[list[ScammerReport]] = relationship(back_populates="scammer")
     proofs: Mapped[list["Proof"]] = relationship(back_populates="scammer")
 
@@ -51,8 +52,10 @@ class ScammerMedia(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[str] = mapped_column()
     file_id: Mapped[str] = mapped_column()
-
+    scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id", ondelete="CASCADE"))
     scammers_reports_id: Mapped[int] = mapped_column(ForeignKey("scammers_reports.id", ondelete="CASCADE"))
+
+    scammer: Mapped[Scammer] = relationship(back_populates="scammer_media")
     scammers_reports: Mapped[ScammerReport] = relationship(back_populates="scammer_media")
 
 

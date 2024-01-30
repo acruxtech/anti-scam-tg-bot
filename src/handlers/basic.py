@@ -57,6 +57,8 @@ async def get_contact(message: Message, bot: Bot):
             chat_id=message.from_user.id, from_chat_id=proof.chat_id, message_id=proof.message_id,
         )
 
+        await bot.send_media_group(chat_id=message.from_user.id, media=proof.media_group)
+
 
 class ScammerSearchState(StatesGroup):
     get_scammer_id = State()

@@ -148,12 +148,14 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
 async def get_video(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
     scam_report_id = data["scammers_reports_id"]
+    scammer_id = data["scammer_id"]
     video_id = message.video.file_id
     await scam_media_repository.create(
         {
             "file_id": video_id,
             "type": "video",
-            "scammers_reports_id": scam_report_id
+            "scammers_reports_id": scam_report_id,
+            "scammer_id": scammer_id
         }
     )
     await message.edit_reply_markup(
@@ -165,12 +167,14 @@ async def get_video(message: Message, bot: Bot, state: FSMContext):
 async def get_photo(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
     scam_report_id = data["scammers_reports_id"]
+    scammer_id = data["scammer_id"]
     photo_id = message.photo[0].file_id
     await scam_media_repository.create(
         {
             "file_id": photo_id,
             "type": "photo",
-            "scammers_reports_id": scam_report_id
+            "scammers_reports_id": scam_report_id,
+            "scammer_id": scammer_id
         }
     )
     await message.edit_reply_markup(
