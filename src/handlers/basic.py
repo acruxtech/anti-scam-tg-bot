@@ -35,7 +35,7 @@ async def get_contact(message: Message, bot: Bot):
     proof = await proof_repository.get_by_scammer_id(scammer.id)
 
     await bot.forward_message(
-        chat_id=message.from_user.id, from_chat_id=message.from_user.id, message_id=proof.message_id,
+        chat_id=message.from_user.id, from_chat_id=proof.chat_id, message_id=proof.message_id,
     )
 
     print(proof.message_id)

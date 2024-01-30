@@ -118,12 +118,14 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
             f"{about_scammer}  🛑"
         )
         messages = await bot.send_media_group(MODERATOR_ID, album_builder.build())
+        print(f"messages = {messages}")
         message_ = messages[0]
         print("id сообщения =", message_.message_id)
         await proof_repository.create(
             {
                 "scammer_id": scammer.id,
-                "message_id": message_.message_id
+                "message_id": message_.message_id,
+                "scammers_reports_id": scammers_reports_id
             }
         )
         await bot.send_message(
