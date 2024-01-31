@@ -64,8 +64,8 @@ class Proof(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     text: Mapped[str] = mapped_column()
-    chat_id: Mapped[int] = mapped_column(BigInteger)
-    message_id: Mapped[int] = mapped_column()
+    chat_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
+    message_id: Mapped[int] = mapped_column(nullable=True)
     scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id", ondelete="CASCADE"))
 
     scammer: Mapped["Scammer"] = relationship(back_populates="proofs")
