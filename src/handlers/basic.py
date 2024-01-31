@@ -111,14 +111,16 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
 
 
 @basic_router.message(ScammerSearchState.get_scammer_username)
-async def get_scammer_username(message: Message, state: FSMContext):
+async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
     username = message.text.strip().replace("@", "")
     scammer = await scammers_service.get_scammer_by_username(username)
 
     info_about_scammer = ""
 
-    if scammer and scammer.is_scam:
+    proof = None
 
+    if scammer and scammer.is_scam:
+        proof = await proof_repository.get_by_scammer_id(scammer.id)
         info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
                              f"ID = <code>{scammer.id}</code>"
 
@@ -135,4 +137,7 @@ async def get_scammer_username(message: Message, state: FSMContext):
                          f"{info_about_scammer}")
 
     await state.clear()
+
+    if proof:
+        await create_media(scammer, proof, message, bot)
 
