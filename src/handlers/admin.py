@@ -40,7 +40,7 @@ F: CallbackQuery
 
 @router.callback_query(F.data == "get_scammer_list")
 async def get_list_scammer(call: CallbackQuery, bot: Bot):
-    await call.message.answer("Отправляю весь список скамеров...")
+    await call.message.answer("Отправляю весь список мошенников...")
     filename = await create_list_scammer()
     document = FSInputFile(path=filename)
     await bot.send_document(call.message.chat.id, document)
@@ -50,7 +50,7 @@ async def get_list_scammer(call: CallbackQuery, bot: Bot):
 @router.callback_query(F.data == "add_scammer")
 async def start_add_scammer(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.message.answer(
-        "Перешлите сообщение скамера или отправьте его кнопкой ниже 👇👇👇", reply_markup=get_send_user_keyboard()
+        "Перешлите сообщение мошенника или отправьте его кнопкой ниже 👇👇👇", reply_markup=get_send_user_keyboard()
     )
     await state.set_state(AdminForm.get_user)
     await call.answer()
@@ -59,7 +59,7 @@ async def start_add_scammer(call: CallbackQuery, bot: Bot, state: FSMContext):
 @router.callback_query(F.data == "delete_scammer")
 async def start_delete_scammer(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.message.answer(
-        "Отправьте ID пользователя (или перешлите сообщение, или отправьте контакт 👇👇👇",
+        "Отправьте ID мошенника (или перешлите сообщение, или отправьте контакт 👇👇👇",
         reply_markup=get_send_user_keyboard()
     )
     await state.set_state(AdminForm.delete_user)
@@ -125,6 +125,6 @@ async def get_proofs(message: Message, bot: Bot, state: FSMContext):
         })
         await scammers_service.confirm(scammer_created.id)
         await state.clear()
-        await message.answer("Скамер добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
+        await message.answer("Мошенник добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
     else:
         await message.answer("Напишите причину, по которой мошенник заносится в базу")

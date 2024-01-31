@@ -66,11 +66,11 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
             scammer_from_db = await scammers_service.add_scammer(scammer)
         except IntegrityException as e:
             scammer_from_db = await scammers_service.get_scammer(scammer.id)
-            print("Пользователь уже числится в скаммерах")
+            print("Пользователь уже числится в мошенниках")
             print(e)
 
         await state.update_data(scammer_id=scammer_from_db.id)
-        await message.answer("Распиши ситуацию, которая произошла у тебя со скаммером:")
+        await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
         await state.set_state(AddScammerForm.get_proofs)
     else:
         await message.answer(
