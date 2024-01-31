@@ -10,15 +10,14 @@ async def create_media(scammer, proof, message: Message, bot: Bot):
         scam_media_repository.model.scammer_id == scammer.id
     )
 
-    if len(media) > 0:
-        album_builder = MediaGroupBuilder(
-            caption=proof.text
-        )
+    album_builder = MediaGroupBuilder(
+        caption=proof.text
+    )
 
-        for media_object in media:
-            if media_object.type == "photo":
-                album_builder.add_photo(media=media_object.file_id)
-            elif media_object.type == "video":
-                album_builder.add_video(media=media_object.file_id)
+    for media_object in media:
+        if media_object.type == "photo":
+            album_builder.add_photo(media=media_object.file_id)
+        elif media_object.type == "video":
+            album_builder.add_video(media=media_object.file_id)
 
-        await bot.send_media_group(message.chat.id, album_builder.build())
+    await bot.send_media_group(message.chat.id, album_builder.build())

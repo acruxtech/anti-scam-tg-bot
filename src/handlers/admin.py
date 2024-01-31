@@ -8,10 +8,12 @@ from src.utils.excel import create_list_scammer
 from src.keyboards.admin import get_admin_inline_keyboard
 from src.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard
 from src.utils.scammers import get_scammer_data_from_message
+from src.entities.scammers.models import proof_repository
 
 
 class AdminForm(StatesGroup):
     get_user = State()
+    get_proofs = State()
     delete_user = State()
 
 
@@ -101,14 +103,28 @@ async def delete_user(message: Message, bot: Bot, state: FSMContext):
 @router.message(AdminForm.get_user)
 async def get_user(message: Message, bot: Bot, state: FSMContext):
     if message.user_shared or (message.forward_from is not None and message.forward_from.id != message.from_user.id):
-        await message.answer("Скамер добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
+        await message.answer("Профиль мошенника получен  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
+        await message.answer("Напишите причину, по которой мошенник заносится в базу:")
         scammer = get_scammer_data_from_message(message)
-        scammer_created = await scammers_service.add_scammer(scammer)
-        await scammers_service.confirm(scammer_created.id)
-        await state.clear()
+        await state.update_data(scammer=scammer)
+        await state.set_state(AdminForm.get_proofs)
     else:
         await message.answer("Пользователь либо скрыл данные о себе, либо вы скинули что-то не то \n\n"
                              "Попробуйте отправить пользователя кнопкной ниже 👇👇👇")
 
 
-
+@router.message(AdminForm.get_proofs)
+async def get_proofs(message: Message, bot: Bot, state: FSMContext):
+    if message.text:
+        data = await state.get_data()
+        scammer = data["scammer"]
+        scammer_created = await scammers_service.add_scammer(scammer)
+        await proof_repository.create({
+            "scammer_id": scammer.id,
+            "text": message.text
+        })
+        await scammers_service.confirm(scammer_created.id)
+        await state.clear()
+        await message.answer("Скамер добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
+    else:
+        await message.answer("Напишите причину, по которой мошенник заносится в базу")
