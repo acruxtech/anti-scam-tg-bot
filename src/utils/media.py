@@ -23,4 +23,4 @@ async def create_media(scammer, proof, message: Message, bot: Bot):
 
         await bot.send_media_group(message.chat.id, album_builder.build())
     else:
-        await bot.send_message(message.chat.id, proof.text)
+        await bot.send_message(message.chat.id, f"<b>Причина:</b> {proof.text}")
