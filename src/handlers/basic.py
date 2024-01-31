@@ -52,7 +52,8 @@ async def get_contact(message: Message, bot: Bot):
         scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
 
     await message.answer(f"{scammer_message}\n\n"
-                         f"{info_about_scammer}")
+                         f"{info_about_scammer}\n\n"
+                         f"Причина:")
 
     if proof:
         await create_media(scammer, proof, message, bot)
@@ -102,7 +103,8 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
             scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
 
         await message.answer(f"{scammer_message}\n\n"
-                             f"{info_about_scammer}")
+                             f"{info_about_scammer}\n\n"
+                             f"Причина:")
 
         await state.clear()
 
@@ -134,7 +136,8 @@ async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
         scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
 
     await message.answer(f"{scammer_message}\n\n"
-                         f"{info_about_scammer}")
+                         f"{info_about_scammer}\n\n"
+                         f"Причина:")
 
     await state.clear()
 
