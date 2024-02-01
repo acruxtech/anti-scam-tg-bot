@@ -123,7 +123,7 @@ JOIN scammers_reports sr ON srm.scammer_id = sr.scammer_id AND sr.decision = tru
         ''')
         async with async_session_maker() as session:
             result = await session.execute(sql_query)
-            scammer_report_media = result.scalars().all()
+            scammer_report_media = result.all()
             print("-" * 100)
             print(scammer_report_media)
             print("-" * 100)
