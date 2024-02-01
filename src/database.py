@@ -10,16 +10,19 @@ from src.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 connection_string = URL.create(
   'postgresql+asyncpg',
   username=DB_USER,
-  password="password12345678",
+  password=DB_PASS,
   port=DB_PORT,
   host=DB_HOST,
   database=DB_NAME
 )
 
+print(connection_string)
 
 Base = declarative_base()
 
 engine = create_async_engine(connection_string)
+print(connection_string)
+
 async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
