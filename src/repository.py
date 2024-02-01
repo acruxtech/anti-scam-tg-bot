@@ -116,7 +116,7 @@ FROM scammers_reports_media srm
 JOIN (
     SELECT scammer_id, MAX(scammers_reports_id) AS max_reports_id
     FROM scammers_reports_media
-    WHERE scammer_id = :scammer_id
+    WHERE scammer_id = {scammer_id}
     GROUP BY scammer_id
 ) max_reports ON srm.scammer_id = max_reports.scammer_id AND srm.scammers_reports_id = max_reports.max_reports_id
 JOIN scammers_reports sr ON srm.scammer_id = sr.scammer_id AND sr.decision = 1;
