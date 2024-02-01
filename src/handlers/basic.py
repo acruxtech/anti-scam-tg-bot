@@ -85,7 +85,7 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
 
 @basic_router.message(ScammerSearchState.get_scammer_username)
 async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
-    username = message.text.strip().replace("@", "")
+    username = message.text.strip().replace("@", "").replace("https://t.me/", "")
 
     scammer = await scammers_service.get_scammer_by_username(username)
 
