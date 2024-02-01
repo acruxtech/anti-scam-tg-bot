@@ -232,7 +232,7 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
                                        "Благодарим за помощь в борьбе с мошенниками!  🤝"
         )
         await bot.edit_message_text(
-            f"Вы добавили мошенника в базу {call.message.from_user.username} ✅", call.message.chat.id, call.message.message_id
+            f"{call.from_user.username} добавил мошенника в базу  ✅", call.message.chat.id, call.message.message_id
         )
         try:
             scammer_report_answered = ScammerAnsweredScheme(
@@ -257,7 +257,7 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
         )
         await state.update_data(reported_id=callback_data.reported_id)
         await bot.edit_message_text(
-            f"Вы отклонили данный репорт  ❌ {call.message.from_user.username}", call.message.chat.id, call.message.message_id
+            f"{call.from_user.username} отклонил данный репорт  ❌", call.message.chat.id, call.message.message_id
         )
         try:
             await bot.edit_message_reply_markup(
