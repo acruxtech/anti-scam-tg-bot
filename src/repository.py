@@ -110,7 +110,7 @@ class SQLAlchemyRepository(RepositoryInterface):
             await session.commit()
 
     async def get_last_true_proofs(self, scammer_id: int):
-        sql_query = text('''
+        sql_query = text(f'''
             SELECT srm.*
             FROM scammers_reports_media srm
             JOIN (
@@ -119,14 +119,14 @@ class SQLAlchemyRepository(RepositoryInterface):
                 WHERE (scammer_id, scammers_reports_id) IN (
                     SELECT scammer_id, MAX(scammers_reports_id) AS max_reports_id
                     FROM scammers_reports_media
-                    WHERE decision = 1 AND scammer_id = :scammer_id
+                    WHERE decision = 1 AND scammer_id = {scammer_id}
                     GROUP BY scammer_id
                 )
                 GROUP BY scammer_id
             ) max_reports ON srm.scammer_id = max_reports.scammer_id AND srm.scammers_reports_id = max_reports.max_reports_id;
         ''')
         async with async_session_maker() as session:
-            result = await session.execute(sql_query, scammer_id=scammer_id)
+            result = await session.execute(sql_query)
             scammer_report_media = result.scalars().all()
             print("-" * 100)
             print(scammer_report_media)
