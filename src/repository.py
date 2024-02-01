@@ -101,6 +101,12 @@ class SQLAlchemyRepository(RepositoryInterface):
             await session.commit()
             return result.scalar()
 
+    async def delete_by_scammer_report_id(self, scammer_report_id: int):
+        async with async_session_maker() as session:
+            stmt = delete(self.model).where(self.model.scammer_report_id == scammer_report_id)
+            await session.execute(stmt)
+            await session.commit()
+
 
 class IntegrityException(Exception):
     pass

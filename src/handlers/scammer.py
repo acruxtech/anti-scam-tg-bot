@@ -107,7 +107,7 @@ async def delete_media(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
     scammer_report_id = data.get("scammers_reports_id")
     if scammer_report_id:
-        await scam_media_repository.delete(scam_media_repository.model.scammers_reports_id == scammer_report_id)
+        await scam_media_repository.delete_by_scammer_report_id(scammer_report_id)
     await message.answer("Пруфы сброшены, можете загрузить новые", reply_markup=get_send_media_scammer_keyboard())
 
 
