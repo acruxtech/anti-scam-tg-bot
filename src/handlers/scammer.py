@@ -102,6 +102,15 @@ async def send_report(message: Message, bot: Bot, state: FSMContext):
     await send_post_to_moderator(message, bot, state, data["scammers_reports_id"])
 
 
+@scammer_router.message(F.text == "Сбросить фото 📸")
+async def delete_media(message: Message, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    scammer_report_id = data.get("scammers_reports_id")
+    if scammer_report_id:
+        await scam_media_repository.delete(scam_media_repository.model.scammers_reports_id == scammer_report_id)
+    await message.answer("Пруфы сброшены, можете загрузить новые", reply_markup=get_send_media_scammer_keyboard())
+
+
 async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, scammers_reports_id: int):
     media = await scam_media_repository.get_list(
         scam_media_repository.model.scammers_reports_id == scammers_reports_id

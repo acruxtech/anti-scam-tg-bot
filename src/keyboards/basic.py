@@ -50,6 +50,7 @@ def get_send_media_scammer_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
 
     keyboard_builder.button(text="Отправить репорт 🚩")
+    keyboard_builder.button(text="Сбросить фото 📸")
     keyboard_builder.button(text="Назад")
 
     keyboard_builder.adjust(1)
