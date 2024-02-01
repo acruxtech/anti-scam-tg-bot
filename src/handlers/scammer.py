@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.media_group import MediaGroupBuilder
 
-from src.config import MODERATOR_ID
+from src.config import MODERATOR_ID, OWNER_IDS
 
 from src.keyboards.basic import (
     get_send_user_keyboard,
@@ -36,6 +36,7 @@ class AddScammerForm(StatesGroup):
     get_profile = State()
     add_profile = State()
     detect_hide_profile = State()
+    get_username = State()
     get_proofs = State()
     get_media = State()
     add_scam_to_database = State()
@@ -70,8 +71,12 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
             print(e)
 
         await state.update_data(scammer_id=scammer_from_db.id)
-        await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
-        await state.set_state(AddScammerForm.get_proofs)
+        if message.from_user.id in OWNER_IDS:
+            await message.answer("Пришлите username пользователя:")
+            await state.set_state(AddScammerForm.get_username)
+        else:
+            await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
+            await state.set_state(AddScammerForm.get_proofs)
     else:
         await message.answer(
             "Пользователь либо скрыл данные о себе, либо вы отправили что-то не то \n\n"
@@ -80,9 +85,20 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
         )
 
 
+@scammer_router.message(AddScammerForm.get_username)
+async def get_username(message: Message, bot: Bot, state: FSMContext):
+    if message.text:
+        await state.update_data(username=message.text.replace("https://t.me/", ""))
+        await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
+        await state.set_state(AddScammerForm.get_proofs)
+    else:
+        await message.answer("Пожалуйста, отправьте корректный username")
+
+
 @scammer_router.message(F.text == "Отправить репорт 🚩")
 async def send_report(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
+
     await send_post_to_moderator(message, bot, state, data["scammers_reports_id"])
 
 
@@ -91,9 +107,13 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
         scam_media_repository.model.scammers_reports_id == scammers_reports_id
     )
 
+    data = await state.get_data()
+
     if len(media) > 0:
         scam_rep = await scammers_reports_service.get_scammer_report(scammers_reports_id)
         scammer = await scammers_service.get_scammer(scam_rep.scammer_id)
+
+        await scammers_service.update_username(scammer, data["username"])
 
         album_builder = MediaGroupBuilder(
             caption=scam_rep.text
@@ -209,7 +229,7 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
                                        "Благодарим за помощь в борьбе с мошенниками!  🤝"
         )
         await bot.edit_message_text(
-            "Вы добавили мошенника в базу  ✅", call.message.chat.id, call.message.message_id
+            f"Вы добавили мошенника в базу {call.message.from_user.username} ✅", call.message.chat.id, call.message.message_id
         )
         try:
             scammer_report_answered = ScammerAnsweredScheme(
@@ -234,7 +254,7 @@ async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state
         )
         await state.update_data(reported_id=callback_data.reported_id)
         await bot.edit_message_text(
-            "Вы отклонили данный репорт  ❌", call.message.chat.id, call.message.message_id
+            f"Вы отклонили данный репорт  ❌ {call.message.from_user.username}", call.message.chat.id, call.message.message_id
         )
         try:
             await bot.edit_message_reply_markup(

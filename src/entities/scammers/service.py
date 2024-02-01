@@ -31,6 +31,10 @@ class ScammerService:
             data.update(scammer.model_dump())
             return await scammers_repository.update(data, scammer_db.id)
 
+    async def update_username(self, scammer_id: int, username: str):
+        data = {"username": username}
+        await self.repository.update(data, scammer_id)
+
     async def confirm(self, scammer_id: int):
         data = {"is_scam": True, "datetime_confirmed": datetime.now()}
         await self.repository.update(data, scammer_id)
