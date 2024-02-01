@@ -26,7 +26,7 @@ async def create_message_about_scammer(scammer, message: Message):
 
         scammer_message = "Этот пользователь - мошенник!   ❌"
         if scammer.username:
-            info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
+            info_about_scammer += f"\n\nUsername = @{scammer.username}"
 
         if scammer.first_name:
             info_about_scammer += f"\n\nFirst Name = <code>{scammer.first_name}</code>"
