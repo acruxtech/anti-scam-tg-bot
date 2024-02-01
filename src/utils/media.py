@@ -7,6 +7,13 @@ from src.entities.scammers.models import scam_media_repository
 
 async def create_media(scammer, proof, message: Message, bot: Bot):
     media = await scam_media_repository.get_last_true_proofs(scammer.id)
+    media = set(tuple(item) for item in media)
+    media = list(media)
+    media = sorted(media, key=lambda x: x[0])
+
+    print("-" * 50)
+    print(media)
+    print("-" * 50)
 
     if len(media) > 0:
         album_builder = MediaGroupBuilder(
