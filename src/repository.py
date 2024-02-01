@@ -104,9 +104,7 @@ class SQLAlchemyRepository(RepositoryInterface):
     async def delete_by_scammer_report_id(self, scammer_report_id: int):
         async with async_session_maker() as session:
             stmt = delete(self.model).where(self.model.scammers_reports_id == scammer_report_id)
-            await session.execute(
-                f"DELETE FROM {self.model.__tablename__} WHERE scammers_reports_id = {scammer_report_id}"
-            )
+            await session.execute(stmt)
             await session.commit()
 
     async def get_last_true_proofs(self, scammer_id: int):
