@@ -12,6 +12,7 @@ DB_NAME = os.environ.get("DB_NAME_TEST") if DEBUG else os.environ.get("DB_NAME")
 DB_USER = os.environ.get("DB_USER_TEST") if DEBUG else os.environ.get("DB_USER")
 DB_PASS = os.environ.get("DB_PASS_TEST") if DEBUG else os.environ.get("DB_PASS")
 
+print(f"Пароль от БД = {DB_PASS}")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
