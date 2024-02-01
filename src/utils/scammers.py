@@ -17,11 +17,12 @@ def get_scammer_data_from_message(message: Message) -> ScammerScheme:
 async def create_message_about_scammer(scammer, message: Message):
     proof = None
 
-    info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
-                         f"ID = <code>{scammer.id}</code>"
+    info_about_scammer = f"<b>Информация о пользователе:</b>\n\n"
 
     if scammer and scammer.is_scam:
         proof = await proof_repository.get_by_scammer_id(scammer.id)
+
+        info_about_scammer += f"ID = <code>{scammer.id}</code>"
 
         scammer_message = "Этот пользователь - мошенник!   ❌"
         if scammer.username:

@@ -34,7 +34,12 @@ async def start(message: Message, bot: Bot):
 async def get_contact(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)
 
-    proof = await create_message_about_scammer(scammer, message)
+    proof = None
+
+    if scammer:
+        proof = await create_message_about_scammer(scammer, message)
+    else:
+        await message.answer("Данный пользователь не был найден в базе, но будьте осторожны")
 
     if proof:
         await create_media(scammer, proof, message, bot)
@@ -67,7 +72,10 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
     else:
         scammer = await scammers_service.get_scammer(scammer_id)
 
-        proof = await create_message_about_scammer(scammer, message)
+        proof = None
+
+        if scammer:
+            proof = await create_message_about_scammer(scammer, message)
 
         if proof:
             await create_media(scammer, proof, message, bot)
@@ -81,7 +89,12 @@ async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
 
     scammer = await scammers_service.get_scammer_by_username(username)
 
-    proof = await create_message_about_scammer(scammer, message)
+    proof = None
+
+    if scammer:
+        proof = await create_message_about_scammer(scammer, message)
+    else:
+        await message.answer("Пользователь не был найден в базе")
 
     if proof:
         await create_media(scammer, proof, message, bot)
