@@ -11,6 +11,7 @@ connection_string = URL.create(
   'postgresql+asyncpg',
   username=DB_USER,
   password=DB_PASS,
+  port=DB_PORT,
   host=DB_HOST,
   database=DB_NAME
 )
