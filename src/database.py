@@ -16,7 +16,7 @@ from src.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 #   database=DB_NAME
 # )
 
-connection_string = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+connection_string = f"postgresql://gen_user:password12345678@82.97.244.195:5432/default_db"
 
 print(connection_string)
 
