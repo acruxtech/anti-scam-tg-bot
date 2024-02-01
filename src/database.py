@@ -21,6 +21,8 @@ Base = declarative_base()
 engine = create_async_engine(connection_string)
 
 async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+print(DB_PASS)
 print(connection_string)
 
 
