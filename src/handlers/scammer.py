@@ -125,8 +125,11 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
             elif media_object.type == "video":
                 album_builder.add_video(media=media_object.file_id)
 
-        if scammer.username or data.get("username"):
+        if scammer.username:
             about_scammer = f"Username = @{scammer.username} \n\n" \
+                            f"ID = <code>{scammer.id}</code>"
+        elif data.get("username"):
+            about_scammer = f"Username = @{data['username']} \n\n" \
                             f"ID = <code>{scammer.id}</code>"
         else:
             about_scammer = f"ID = <code>{scammer.id}</code>"
