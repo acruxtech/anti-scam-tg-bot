@@ -11,7 +11,7 @@ from src.entities.users.service import user_service
 from src.entities.scammers.service import scammers_service
 from src.entities.scammers.models import proof_repository
 from src.utils.media import create_media
-
+from src.utils.scammers import create_message_about_scammer
 
 basic_router = Router()
 
@@ -34,25 +34,7 @@ async def start(message: Message, bot: Bot):
 async def get_contact(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)
 
-    proof = None
-
-    info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
-                         f"ID = <code>{message.user_shared.user_id}</code>"
-
-    if scammer and scammer.is_scam:
-        proof = await proof_repository.get_by_scammer_id(scammer.id)
-
-        scammer_message = "Этот пользователь - мошенник!   ❌"
-        if scammer.username:
-            info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
-
-        if scammer.first_name:
-            info_about_scammer += f"\n\nFirst Name = <code>{scammer.first_name}</code>"
-    else:
-        scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
-
-    await message.answer(f"{scammer_message}\n\n"
-                         f"{info_about_scammer}")
+    proof = await create_message_about_scammer(scammer, message)
 
     if proof:
         await create_media(scammer, proof, message, bot)
@@ -85,59 +67,23 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
     else:
         scammer = await scammers_service.get_scammer(scammer_id)
 
-        info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
-                             f"ID = <code>{scammer_id}</code>"
-
-        proof = None
-
-        if scammer and scammer.is_scam:
-            proof = await proof_repository.get_by_scammer_id(scammer.id)
-            scammer_message = "Этот пользователь - мошенник!   ❌"
-            if scammer.username:
-                info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
-
-            if scammer.first_name:
-                info_about_scammer += f"\n\nFirst Name = <code>{scammer.first_name}</code>"
-        else:
-            scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
-
-        await message.answer(f"{scammer_message}\n\n"
-                             f"{info_about_scammer}")
-
-        await state.clear()
+        proof = await create_message_about_scammer(scammer, message)
 
         if proof:
             await create_media(scammer, proof, message, bot)
+
+        await state.clear()
 
 
 @basic_router.message(ScammerSearchState.get_scammer_username)
 async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
     username = message.text.strip().replace("@", "")
+
     scammer = await scammers_service.get_scammer_by_username(username)
 
-    info_about_scammer = ""
-
-    proof = None
-
-    if scammer and scammer.is_scam:
-        proof = await proof_repository.get_by_scammer_id(scammer.id)
-        info_about_scammer = f"<b>Информация о пользователе:</b>\n\n" \
-                             f"ID = <code>{scammer.id}</code>"
-
-        scammer_message = "Этот пользователь - мошенник!   ❌"
-        if scammer.username:
-            info_about_scammer += f"\n\nUsername = <code>{scammer.username}</code>"
-
-        if scammer.first_name:
-            info_about_scammer += f"\n\nFirst Name = <code>{scammer.first_name}</code>"
-    else:
-        scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
-
-    await message.answer(f"{scammer_message}\n\n"
-                         f"{info_about_scammer}")
-
-    await state.clear()
+    proof = await create_message_about_scammer(scammer, message)
 
     if proof:
         await create_media(scammer, proof, message, bot)
 
+    await state.clear()
