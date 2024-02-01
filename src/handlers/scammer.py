@@ -113,7 +113,7 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
         scam_rep = await scammers_reports_service.get_scammer_report(scammers_reports_id)
         scammer = await scammers_service.get_scammer(scam_rep.scammer_id)
 
-        await scammers_service.update_username(scammer, data["username"])
+        await scammers_service.update_username(scammer.id, data["username"])
 
         album_builder = MediaGroupBuilder(
             caption=scam_rep.text
