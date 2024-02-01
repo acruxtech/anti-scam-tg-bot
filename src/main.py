@@ -21,7 +21,6 @@ async def start():
     try:
         await scammers_repository.create_many(scammer_ids_and_usernames)
     except IntegrityException as e:
-        print(e)
         print("Скамеры уже добавлены в базу")
 
     bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
