@@ -6,7 +6,7 @@ from src.entities.scammers.models import scam_media_repository
 
 
 async def create_media(scammer, proof, message: Message, bot: Bot):
-    media = await scam_media_repository.get_list(
+    media = await scam_media_repository.get_last_true_proofs(
         scam_media_repository.model.scammer_id == scammer.id
     )
 

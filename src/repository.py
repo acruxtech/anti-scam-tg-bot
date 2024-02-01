@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import insert, select, update, delete
+from sqlalchemy import insert, select, update, delete, text
 from sqlalchemy.exc import IntegrityError
 
 from src.database import async_session_maker, Base
@@ -104,8 +104,34 @@ class SQLAlchemyRepository(RepositoryInterface):
     async def delete_by_scammer_report_id(self, scammer_report_id: int):
         async with async_session_maker() as session:
             stmt = delete(self.model).where(self.model.scammers_reports_id == scammer_report_id)
-            await session.execute(stmt)
+            await session.execute(
+                f"DELETE FROM {self.model.__tablename__} WHERE scammers_reports_id = {scammer_report_id}"
+            )
             await session.commit()
+
+    async def get_last_true_proofs(self, scammer_id: int):
+        sql_query = text('''
+            SELECT srm.*
+            FROM scammers_reports_media srm
+            JOIN (
+                SELECT scammer_id, MAX(scammers_reports_id) AS max_reports_id
+                FROM scammers_reports_media
+                WHERE (scammer_id, scammers_reports_id) IN (
+                    SELECT scammer_id, MAX(scammers_reports_id) AS max_reports_id
+                    FROM scammers_reports_media
+                    WHERE decision = 1 AND scammer_id = :scammer_id
+                    GROUP BY scammer_id
+                )
+                GROUP BY scammer_id
+            ) max_reports ON srm.scammer_id = max_reports.scammer_id AND srm.scammers_reports_id = max_reports.max_reports_id;
+        ''')
+        async with async_session_maker() as session:
+            result = await session.execute(sql_query, scammer_id=scammer_id)
+            scammer_report_media = result.scalars().all()
+            print("-" * 100)
+            print(scammer_report_media)
+            print("-" * 100)
+            return scammer_report_media
 
 
 class IntegrityException(Exception):
