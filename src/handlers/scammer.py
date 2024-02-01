@@ -113,7 +113,10 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
         scam_rep = await scammers_reports_service.get_scammer_report(scammers_reports_id)
         scammer = await scammers_service.get_scammer(scam_rep.scammer_id)
 
-        await scammers_service.update_username(scammer.id, data["username"])
+        username = data.get("username")
+
+        if username:
+            await scammers_service.update_username(scammer.id, username)
 
         album_builder = MediaGroupBuilder(
             caption=scam_rep.text
@@ -128,8 +131,8 @@ async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, 
         if scammer.username:
             about_scammer = f"Username = @{scammer.username} \n\n" \
                             f"ID = <code>{scammer.id}</code>"
-        elif data.get("username"):
-            about_scammer = f"Username = @{data['username']} \n\n" \
+        elif username:
+            about_scammer = f"Username = @{username} \n\n" \
                             f"ID = <code>{scammer.id}</code>"
         else:
             about_scammer = f"ID = <code>{scammer.id}</code>"
