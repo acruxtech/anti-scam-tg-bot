@@ -24,6 +24,7 @@ engine = create_async_engine(connection_string)
 print(connection_string)
 
 async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+print(connection_string)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
