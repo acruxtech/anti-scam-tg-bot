@@ -117,8 +117,7 @@ JOIN (
     WHERE scammer_id = {scammer_id}
     GROUP BY scammer_id
 ) max_reports ON srm.scammer_id = max_reports.scammer_id AND srm.scammers_reports_id = max_reports.max_reports_id
-JOIN scammers_reports sr ON srm.scammer_id = sr.scammer_id AND sr.decision = true
-GROUP BY srm.scammer_id, srm.scammers_reports_id, srm.type, src.file_id, srm.id;
+JOIN scammers_reports sr ON srm.scammer_id = sr.scammer_id AND sr.decision = true;
         ''')
         async with async_session_maker() as session:
             result = await session.execute(sql_query)
