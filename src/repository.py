@@ -114,7 +114,7 @@ class SQLAlchemyRepository(RepositoryInterface):
     async def get_last_true_proofs(self, scammer_id: int):
         sql_query = text(f'''
 SELECT srm.*
-FROM scammers_reports_media srm
+FROM media srm
 JOIN (
     SELECT scammer_id, MAX(scammers_reports_id) AS max_reports_id
     FROM scammers_reports_media
