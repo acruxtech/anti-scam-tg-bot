@@ -117,7 +117,7 @@ SELECT srm.*
 FROM media srm
 JOIN (
     SELECT scammer_id, MAX(scammers_reports_id) AS max_reports_id
-    FROM scammers_reports_media
+    FROM media
     WHERE scammer_id = {scammer_id}
     GROUP BY scammer_id
 ) max_reports ON srm.scammer_id = max_reports.scammer_id AND srm.proof_id = max_reports.max_reports_id
