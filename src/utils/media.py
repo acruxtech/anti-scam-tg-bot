@@ -11,11 +11,13 @@ async def create_media(scammer, proof, message: Message, bot: Bot):
     media = list(media)
     media = sorted(media, key=lambda x: x[0])
 
+    print(media)
+
     media = [ScammerMedia(
         id=item[0],
         type=item[1],
         file_id=item[2],
-        scammers_reports_id=item[3],
+        proof_id=item[3],
         scammer_id=item[4]
     ) for item in media]
 
