@@ -1,4 +1,5 @@
 import re
+import csv
 
 
 with open("scammer_data.txt", "r", encoding="utf-8") as f:
@@ -35,4 +36,30 @@ for input_string in scammer_data.splitlines():
                     "is_scam": True
                 }
             )
+
+with open("scammer_data.csv", newline='', encoding='utf-8') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        user_id = int(row['id'])
+        username = row['username']
+
+        exists = False
+
+        for scammer_id_and_username in scammer_ids_and_usernames:
+            if scammer_id_and_username["id"] == user_id:
+                exists = True
+                break
+
+        if exists:
+            continue
+        else:
+            scammer_ids_and_usernames.append(
+                {
+                    "id": user_id,
+                    "username": username,
+                    "number_requests": 1,
+                    "is_scam": True
+                }
+            )
+
 
