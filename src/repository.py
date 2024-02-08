@@ -116,7 +116,7 @@ class SQLAlchemyRepository(RepositoryInterface):
 SELECT srm.*
 FROM media srm
 JOIN (
-    SELECT scammer_id, MAX(scammers_reports_id) AS max_reports_id
+    SELECT scammer_id, MAX(proof_id) AS max_reports_id
     FROM media
     WHERE scammer_id = {scammer_id}
     GROUP BY scammer_id
