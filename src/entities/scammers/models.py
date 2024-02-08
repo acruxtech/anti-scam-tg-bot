@@ -7,28 +7,6 @@ from src.database import Base
 from src.repository import SQLAlchemyRepository
 
 
-class ScammerReport(Base):
-    __tablename__ = "scammers_reports"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    text: Mapped[str] = mapped_column(nullable=True)
-    datetime_reported: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-
-    is_reviewed: Mapped[bool] = mapped_column(default=False)
-    reviewer_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
-    datetime_reviewed: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    explanation: Mapped[str] = mapped_column(nullable=True)
-    decision: Mapped[bool] = mapped_column(nullable=True)
-
-    message_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
-    reported_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id", ondelete="CASCADE"))
-
-    reported_user: Mapped["User"] = relationship(back_populates="scammers_reports")
-    scammer: Mapped["Scammer"] = relationship(back_populates="scammers_reports")
-    scammer_media: Mapped[list["ScammerMedia"]] = relationship(back_populates="scammers_reports")
-
-
 class Scammer(Base):
     __tablename__ = "scammers"
 
@@ -42,21 +20,20 @@ class Scammer(Base):
     is_scam: Mapped[bool] = mapped_column(default=False, nullable=True)
 
     scammer_media: Mapped[list["ScammerMedia"]] = relationship(back_populates="scammer")
-    scammers_reports: Mapped[list[ScammerReport]] = relationship(back_populates="scammer")
     proofs: Mapped[list["Proof"]] = relationship(back_populates="scammer")
 
 
 class ScammerMedia(Base):
-    __tablename__ = "scammers_reports_media"
+    __tablename__ = "media"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[str] = mapped_column()
     file_id: Mapped[str] = mapped_column()
     scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id", ondelete="CASCADE"))
-    scammers_reports_id: Mapped[int] = mapped_column(ForeignKey("scammers_reports.id", ondelete="CASCADE"))
+    proof_id: Mapped[int] = mapped_column(ForeignKey("proofs.id", ondelete="CASCADE"))
 
     scammer: Mapped[Scammer] = relationship(back_populates="scammer_media")
-    scammers_reports: Mapped[ScammerReport] = relationship(back_populates="scammer_media")
+    proof: Mapped["Proof"] = relationship(back_populates="scammer_media")
 
 
 class Proof(Base):
@@ -64,17 +41,19 @@ class Proof(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     text: Mapped[str] = mapped_column()
-    chat_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
-    message_id: Mapped[int] = mapped_column(nullable=True)
-    scammer_id: Mapped[int] = mapped_column(ForeignKey("scammers.id", ondelete="CASCADE"))
+    decision: Mapped[bool] = mapped_column(default=False)
 
-    scammer: Mapped["Scammer"] = relationship(back_populates="proofs")
+    scammer_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("scammers.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"))
+    moderator_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
+
+    scammer: Mapped[Scammer] = relationship(back_populates="proofs")
+    scammer_media: Mapped[list[ScammerMedia]] = relationship(back_populates="proof")
+    user: Mapped["User"] = relationship(back_populates="proofs")
 
 
 scammers_repository = SQLAlchemyRepository(Scammer)
 
-scammers_reports_repository = SQLAlchemyRepository(ScammerReport)
-
-scam_media_repository = SQLAlchemyRepository(ScammerMedia)
+media_repository = SQLAlchemyRepository(ScammerMedia)
 
 proof_repository = SQLAlchemyRepository(Proof)

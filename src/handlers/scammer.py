@@ -16,18 +16,16 @@ from src.keyboards.basic import (
     get_contact_cancel_keyboard,
 )
 from src.keyboards.menu import get_report_message
+from src.messages import get_about_scammer_message
 
-from src.entities.scammers.schemas import ScammerReportSchemeCreate, ScammerAnsweredScheme
-from src.entities.scammers.service import scammers_service, scammers_reports_service
-from src.entities.scammers.models import scam_media_repository, proof_repository
-from src.repository import IntegrityException
+from src.entities.scammers.schemas import ScammerScheme, ScammerAnsweredScheme, ProofScheme
+from src.entities.scammers.service import scammers_service
+from src.entities.scammers.models import media_repository, proof_repository
 
-from src.utils.callbacks import ReportMessage
+from src.utils.callbacks import ProofMessage
 from src.utils.scammers import get_scammer_data_from_message
 
-
 scammer_router = Router()
-
 
 F: Message
 
@@ -63,14 +61,8 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
         await message.answer("Мы получили профиль пользователя ✅", reply_markup=get_contact_cancel_keyboard())
         scammer = get_scammer_data_from_message(message)
 
-        try:
-            scammer_from_db = await scammers_service.add_scammer(scammer)
-        except IntegrityException as e:
-            scammer_from_db = await scammers_service.get_scammer(scammer.id)
-            print("Пользователь уже числится в мошенниках")
-            print(e)
+        await state.update_data(scammer=scammer)
 
-        await state.update_data(scammer_id=scammer_from_db.id)
         if message.from_user.id in OWNER_IDS:
             await message.answer("Пришлите username пользователя:")
             await state.set_state(AddScammerForm.get_username)
@@ -88,7 +80,11 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
 @scammer_router.message(AddScammerForm.get_username)
 async def get_username(message: Message, bot: Bot, state: FSMContext):
     if message.text:
-        await state.update_data(username=message.text.replace("https://t.me/", ""))
+        username = message.text.replace("https://t.me/", "").replace("@", "")
+        data = await state.get_data()
+        data["scammer"].username = username
+
+        await state.update_data(scammer=data["scammer"])
         await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
         await state.set_state(AddScammerForm.get_proofs)
     else:
@@ -99,101 +95,127 @@ async def get_username(message: Message, bot: Bot, state: FSMContext):
 async def send_report(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
 
-    await send_post_to_moderator(message, bot, state, data["scammers_reports_id"])
+    scammer = data.get("scammer")
+    proof = data.get("proof")
+    media = data.get("media")
+
+    print("-" * 100)
+    print(scammer)
+    print(proof)
+    print(media)
+
+    if media:
+        scammer_from_db, proof_from_db = await scammers_service.save(scammer, proof, media)
+        await state.clear()
+        await send_post_to_moderator_chat(message, bot, scammer_from_db, proof_from_db)
+        await message.answer(
+            "<b>Спасибо за обращение!</b>\n\n"
+            "Ваша заявка на рассмотрении у модераторов, ожидайте…",
+            reply_markup=get_main_menu_keyboard(message.from_user.id)
+        )
+    else:
+        await message.answer("Загрузите хотя бы 1 фотографию или видео")
 
 
 @scammer_router.message(F.text == "Сбросить фото 📸")
 async def delete_media(message: Message, bot: Bot, state: FSMContext):
-    data = await state.get_data()
-    scammer_report_id = data.get("scammers_reports_id")
-    if scammer_report_id:
-        await scam_media_repository.delete_by_scammer_report_id(scammer_report_id)
+    await state.update_data(media=None)
     await message.answer("Пруфы сброшены, можете загрузить новые", reply_markup=get_send_media_scammer_keyboard())
 
 
-async def send_post_to_moderator(message: Message, bot: Bot, state: FSMContext, scammers_reports_id: int):
-    media = await scam_media_repository.get_list(
-        scam_media_repository.model.scammers_reports_id == scammers_reports_id
+async def send_post_to_moderator_chat(
+    message: Message,
+    bot: Bot,
+    scammer_from_db: ScammerScheme,
+    proof_from_db: ProofScheme
+):
+    media = await media_repository.get_list(
+        media_repository.model.proof_id == proof_from_db.id
     )
 
-    data = await state.get_data()
+    album_builder = MediaGroupBuilder(
+        caption=proof_from_db.text
+    )
 
-    if len(media) > 0:
-        scam_rep = await scammers_reports_service.get_scammer_report(scammers_reports_id)
-        scammer = await scammers_service.get_scammer(scam_rep.scammer_id)
+    for media_item in media:
+        if media_item.type == "photo":
+            album_builder.add_photo(media=media_item.file_id)
+        elif media_item.type == "video":
+            album_builder.add_video(media=media_item.file_id)
 
-        username = data.get("username")
+    about_scammer = get_about_scammer_message(scammer_from_db)
 
-        if username:
-            await scammers_service.update_username(scammer.id, username)
+    await bot.send_message(
+        MODERATOR_ID,
+        f"Репорт от <b>@{message.from_user.username}</b> \n\n"
+        f"На пользователя: \n\n"
+        f"{about_scammer}  🛑"
+    )
 
-        album_builder = MediaGroupBuilder(
-            caption=scam_rep.text
-        )
+    await bot.send_media_group(MODERATOR_ID, album_builder.build())
 
-        for media_object in media:
-            if media_object.type == "photo":
-                album_builder.add_photo(media=media_object.file_id)
-            elif media_object.type == "video":
-                album_builder.add_video(media=media_object.file_id)
+    await bot.send_message(
+        MODERATOR_ID, "Выберите действие:",
+        reply_markup=get_report_message(message.from_user.id, proof_from_db.id, scammer_from_db.id)
+    )
 
-        if scammer.username:
-            about_scammer = f"Username = @{scammer.username} \n\n" \
-                            f"ID = <code>{scammer.id}</code>"
-        elif username:
-            about_scammer = f"Username = @{username} \n\n" \
-                            f"ID = <code>{scammer.id}</code>"
-        else:
-            about_scammer = f"ID = <code>{scammer.id}</code>"
 
-        await bot.send_message(
-            MODERATOR_ID,
-            f"Репорт от <b>@{message.from_user.username}</b> \n\n"
-            f"На пользователя: \n\n"
-            f"{about_scammer}  🛑"
-        )
-        messages = await bot.send_media_group(MODERATOR_ID, album_builder.build())
-        print(f"messages = {messages}")
-        message_ = messages[0]
-        print("id сообщения =", message_.message_id)
-        await proof_repository.create(
-            {
-                "scammer_id": scammer.id,
-                "message_id": message_.message_id,
-                "text": scam_rep.text,
-                "chat_id": message_.chat.id
-            }
+@scammer_router.callback_query(ProofMessage.filter())
+async def accept_decision(call: CallbackQuery, bot: Bot, state: FSMContext, callback_data: ProofMessage):
+    await proof_repository.update(
+        {"decision": callback_data.decision, "moderator_id": call.from_user.id},
+        callback_data.id,
+    )
+
+    if callback_data.decision:
+        await scammers_service.confirm(callback_data.scammer_id)
+        await bot.edit_message_text(
+            f"{call.from_user.username} добавил мошенника в базу  ✅",
+            call.message.chat.id,
+            call.message.message_id
         )
         await bot.send_message(
-            MODERATOR_ID, "Выберите действие:",
-            reply_markup=get_report_message(message.from_user.id, scammers_reports_id)
-        )
-        await state.clear()
-        await message.answer(
-            "<b>Спасибо за обращение!</b>\n\n"
-            "Ваша заявка на рассмотрении у модераторов, ожидайте…",
-            # "Ваш репорт отправился на рассмотрение...  🕒\n\n"
-            # "Мы сообщим наше решение по делу после рассмотрения модератором  👨‍⚖",
-            reply_markup=get_main_menu_keyboard(message.from_user.id)
+            callback_data.user_id,
+            "Мы рассмотрели ваш репорт на пользователя и занесли его в базу! 👮‍♂\n\n"
+            "Благодарим за помощь в борьбе с мошенниками!  🤝"
         )
     else:
-        await message.answer("Загрузи хотя бы 1 фотографию или видео")
+        await bot.edit_message_text(
+            f"{call.from_user.username} отклонил данный репорт  ❌",
+            call.message.chat.id,
+            call.message.message_id
+        )
+        await bot.send_message(
+            callback_data.user_id,
+            f"Мы отклонили ваш репорт на пользователя! \n\n"
+            f"Попробуйте подать новый репорт или написать в тех поддержку!"
+        )
+
+    await call.answer()
 
 
 @scammer_router.message(AddScammerForm.get_media, F.video)
 async def get_video(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
-    scam_report_id = data["scammers_reports_id"]
-    scammer_id = data["scammer_id"]
+    scammer_id = data["scammer"].id
+
     video_id = message.video.file_id
-    await scam_media_repository.create(
-        {
-            "file_id": video_id,
-            "type": "video",
-            "scammers_reports_id": scam_report_id,
-            "scammer_id": scammer_id
-        }
-    )
+
+    media = data.get("media")
+
+    media_item = {
+        "file_id": video_id,
+        "type": "video",
+        "scammer_id": scammer_id
+    }
+
+    if media:
+        media.append(media_item)
+    else:
+        media = [media_item]
+
+    await state.update_data(media=media)
+
     await message.edit_reply_markup(
         reply_markup=get_send_media_scammer_keyboard()
     )
@@ -202,17 +224,25 @@ async def get_video(message: Message, bot: Bot, state: FSMContext):
 @scammer_router.message(AddScammerForm.get_media, F.photo)
 async def get_photo(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
-    scam_report_id = data["scammers_reports_id"]
-    scammer_id = data["scammer_id"]
+    scammer_id = data["scammer"].id
+
     photo_id = message.photo[0].file_id
-    await scam_media_repository.create(
-        {
-            "file_id": photo_id,
-            "type": "photo",
-            "scammers_reports_id": scam_report_id,
-            "scammer_id": scammer_id
-        }
-    )
+
+    media = data.get("media")
+
+    media_item = {
+        "file_id": photo_id,
+        "type": "photo",
+        "scammer_id": scammer_id
+    }
+
+    if media:
+        media.append(media_item)
+    else:
+        media = [media_item]
+
+    await state.update_data(media=media)
+
     await message.edit_reply_markup(
         reply_markup=get_send_media_scammer_keyboard()
     )
@@ -221,89 +251,12 @@ async def get_photo(message: Message, bot: Bot, state: FSMContext):
 @scammer_router.message(AddScammerForm.get_proofs, F.text)
 async def ask_proofs(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
-    scammer_report = ScammerReportSchemeCreate(
-        text=message.text, reported_id=message.from_user.id, scammer_id=data["scammer_id"]
-    )
-    scammers_reports = await scammers_reports_service.create_scammer_report(scammer_report)
+    scammer = data["scammer"]
+    proof = ProofScheme(text=message.text, scammer_id=scammer.id, user_id=message.from_user.id)
     await message.answer(
         "Отправь фото/видео для доказательства скама 🖼 🎥 \n\n"
         "После отправки нажмите на кнопку ниже 👇👇👇",
         reply_markup=get_send_media_scammer_keyboard()
     )
-    await state.update_data(scammers_reports_id=scammers_reports.id)
+    await state.update_data(proof=proof)
     await state.set_state(AddScammerForm.get_media)
-
-
-@scammer_router.callback_query(ReportMessage.filter())
-async def qwe(call: CallbackQuery, bot: Bot, callback_data: ReportMessage, state: FSMContext):
-    await state.update_data(scammer_report_id=callback_data.id)
-    await scammers_reports_service.update_scammer_report(callback_data.id, call.message.message_id)
-    if callback_data.decision:
-        await bot.send_message(
-            callback_data.reported_id, "Мы рассмотрели ваш репорт на пользователя и занесли его в базу! 👮‍♂\n\n"
-                                       "Благодарим за помощь в борьбе с мошенниками!  🤝"
-        )
-        await bot.edit_message_text(
-            f"{call.from_user.username} добавил мошенника в базу  ✅", call.message.chat.id, call.message.message_id
-        )
-        try:
-            scammer_report_answered = ScammerAnsweredScheme(
-                is_reviewed=True,
-                reviewer_id=call.message.from_user.id,
-                decision=True
-            )
-            scammer_report = await scammers_reports_service.answer_to_scammer_report(
-                callback_data.id, scammer_report_answered
-            )
-            await scammers_service.confirm(scammer_report.scammer_id)
-            await bot.edit_message_reply_markup(
-                call.message.chat.id, call.message.message_id, reply_markup=None
-            )
-        except TelegramBadRequest:
-            pass
-    else:
-        await bot.send_message(
-            callback_data.reported_id,
-            f"Мы отклонили ваш репорт на пользователя! \n\n"
-            f"Попробуйте подать новый репорт или написать в тех поддержку!"
-        )
-        await state.update_data(reported_id=callback_data.reported_id)
-        await bot.edit_message_text(
-            f"{call.from_user.username} отклонил данный репорт  ❌", call.message.chat.id, call.message.message_id
-        )
-        try:
-            await bot.edit_message_reply_markup(
-                call.message.chat.id, call.message.message_id, reply_markup=None
-            )
-        except TelegramBadRequest:
-            pass
-    await call.answer()
-
-
-@scammer_router.message(AddScammerForm.get_explanation)
-async def refuse_report(message: Message, bot: Bot, state: FSMContext):
-    if len(message.text) > 0:
-        data = await state.get_data()
-        scammer_report_id = data["scammer_report_id"]
-        scammer_report_answered = ScammerAnsweredScheme(
-            is_reviewed=True,
-            reviewer_id=message.from_user.id,
-            decision=False,
-            explanation=message.text
-        )
-        updated_scammer_report = await scammers_reports_service.answer_to_scammer_report(
-            scammer_report_id, scammer_report_answered
-        )
-        await message.answer(
-            "Причина отказа была отправлена пользователю  ✅",
-            reply_markup=get_main_menu_keyboard(message.from_user.id)
-        )
-        await bot.send_message(
-            data["reported_id"],
-            f"Мы отклонили ваш репорт на пользователя c ID = <code>{updated_scammer_report.scammer_id}</code>! \n\n"
-            f"Причина отказа: <b>{message.text}</b>\n\n"
-            f"Попробуй подать новый репорт или написать в тех поддержку!"
-        )
-        await state.clear()
-    else:
-        await message.answer("Напишите текст")

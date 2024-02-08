@@ -5,7 +5,8 @@ class ContactMessage(CallbackData, prefix="contact"):
     id: int
 
 
-class ReportMessage(CallbackData, prefix="report"):
+class ProofMessage(CallbackData, prefix="proof"):
     id: int
-    reported_id: int
+    user_id: int
     decision: bool
+    scammer_id: int

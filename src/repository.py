@@ -16,6 +16,10 @@ class RepositoryInterface(ABC):
         raise NotImplemented
 
     @abstractmethod
+    async def create_many(self, data: list):
+        raise NotImplemented
+
+    @abstractmethod
     async def update(self, update_date: dict, entity_id: int):
         raise NotImplemented
 

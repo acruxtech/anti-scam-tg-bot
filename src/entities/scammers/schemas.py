@@ -8,6 +8,13 @@ class ScammerScheme(BaseModel):
     language_code: str | None = None
 
 
+class ProofScheme(BaseModel):
+    id: int | None = None
+    text: str
+    scammer_id: int
+    user_id: int
+
+
 class ScammerReportSchemeBase(BaseModel):
     text: str
     reported_id: int

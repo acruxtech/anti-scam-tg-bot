@@ -25,3 +25,13 @@ def get_start_message_old(message: Message) -> str:
     
 - Возможность добавить скамера в базу мошенников ✍️🚫"""
     return start_message
+
+
+def get_about_scammer_message(scammer) -> str:
+    if scammer.username:
+        about_scammer = f"Username = @{scammer.username} \n\n" \
+                        f"ID = <code>{scammer.id}</code>"
+    else:
+        about_scammer = f"ID = <code>{scammer.id}</code>"
+
+    return about_scammer

@@ -1,14 +1,21 @@
 from datetime import datetime
 
-from src.entities.scammers.schemas import ScammerScheme, ScammerReportSchemeCreate, ScammerAnsweredScheme
+from src.entities.scammers.schemas import ScammerScheme, ProofScheme
 from src.repository import RepositoryInterface, IntegrityException
-from src.entities.scammers.models import scammers_repository, scammers_reports_repository
+from src.entities.scammers.models import scammers_repository, media_repository, proof_repository
 
 
 class ScammerService:
 
-    def __init__(self, repository: RepositoryInterface):
+    def __init__(
+            self,
+            repository: RepositoryInterface,
+            proof_repository_: RepositoryInterface,
+            scammer_media_repository: RepositoryInterface
+    ):
         self.repository = repository
+        self.proof_repository = proof_repository_
+        self.scammer_media_repository = scammer_media_repository
 
     async def get_scammer_list(self):
         return await self.repository.get_list(self.repository.model.is_scam == True)
@@ -42,36 +49,26 @@ class ScammerService:
     async def delete_scammer(self, scammer_id: int):
         return await self.repository.delete(scammer_id)
 
+    async def save(self, scammer: ScammerScheme, proof: ProofScheme, media: list):
+        try:
+            scammer_from_db = await self.repository.create(scammer.model_dump())
+        except IntegrityException as e:
+            print(e)
+            scammer_from_db = await self.repository.get(scammer.id)
 
-class ScammerReportService:
+        proof_data = proof.model_dump()
 
-    def __init__(self, repository: RepositoryInterface):
-        self.repository = repository
+        del proof_data["id"]
 
-    async def update_scammer_report(self, scammer_report_id: int, message_id: int):
-        pass
+        proof_from_db = await self.proof_repository.create(proof_data)
 
-    async def create_scammer_report(self, scammer_report: ScammerReportSchemeCreate):
-        return await self.repository.create(scammer_report.model_dump())
+        for i, media_item in enumerate(media):
+            media[i]["scammer_id"] = scammer_from_db.id
+            media[i]["proof_id"] = proof_from_db.id
 
-    async def answer_to_scammer_report(
-            self, scammer_report_id: int, scammer_report_answer: ScammerAnsweredScheme
-    ):
-        data = {
-            "is_reviewed": scammer_report_answer.is_reviewed,
-            "datetime_reviewed": datetime.now(),
-            "decision": scammer_report_answer.decision,
-            "reviewer_id": scammer_report_answer.reviewer_id
-        }
+        await self.scammer_media_repository.create_many(media)
 
-        if scammer_report_answer.explanation is not None:
-            data.update({"explanation": scammer_report_answer.explanation})
-
-        return await self.repository.update(data, scammer_report_id)
-
-    async def get_scammer_report(self, scammer_report_id: int):
-        return await self.repository.get(scammer_report_id)
+        return scammer_from_db, proof_from_db
 
 
-scammers_service = ScammerService(scammers_repository)
-scammers_reports_service = ScammerReportService(scammers_reports_repository)
+scammers_service = ScammerService(scammers_repository, proof_repository, media_repository)

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.repository import SQLAlchemyRepository
 from src.database import Base
-from src.entities.scammers.models import ScammerReport
+from src.entities.scammers.models import Proof
 
 
 class User(Base):
@@ -20,7 +20,7 @@ class User(Base):
     datetime_first: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     datetime_last: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
-    scammers_reports: Mapped[list[ScammerReport]] = relationship(back_populates="reported_user")
+    proofs: Mapped[list[Proof]] = relationship(back_populates="user")
 
 
 user_repository = SQLAlchemyRepository(User)

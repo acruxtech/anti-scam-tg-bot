@@ -2,11 +2,11 @@ from aiogram import Bot
 from aiogram.types import Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
-from src.entities.scammers.models import scam_media_repository, ScammerMedia
+from src.entities.scammers.models import media_repository, ScammerMedia
 
 
 async def create_media(scammer, proof, message: Message, bot: Bot):
-    media = await scam_media_repository.get_last_true_proofs(scammer.id)
+    media = await media_repository.get_last_true_proofs(scammer.id)
     media = set(tuple(item) for item in media)
     media = list(media)
     media = sorted(media, key=lambda x: x[0])
