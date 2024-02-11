@@ -74,6 +74,7 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
 
         if not scammer:
             await message.answer("Пользователь не был найден в базе")
+            await state.clear()
             return
 
         proof = None
