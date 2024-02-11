@@ -1,9 +1,7 @@
-import asyncio
-from typing import Callable, Dict, Any, Awaitable
-
 from aiogram import types
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
-from aiogram.types import TelegramObject
+import asyncio
+import datetime
 
 
 class RateLimitMiddleware(BaseMiddleware):
@@ -22,8 +20,9 @@ class RateLimitMiddleware(BaseMiddleware):
         user_id = message.from_user.id
         if user_id not in self.storage:
             self.storage[user_id] = []
-        now = message.date
-        self.storage[user_id] = [t for t in self.storage[user_id] if now - t < self.interval]  # Clean old timestamps
+        now = datetime.datetime.now()
+        self.storage[user_id] = [t for t in self.storage[user_id] if
+                                 (now - t).seconds < self.interval]  # Clean old timestamps
         if len(self.storage[user_id]) >= self.limit:
             await message.reply("You are sending messages too frequently. Please wait a moment.")
             raise asyncio.CancelledError()  # Cancel the handler
@@ -33,10 +32,10 @@ class RateLimitMiddleware(BaseMiddleware):
         user_id = callback_query.from_user.id
         if user_id not in self.storage:
             self.storage[user_id] = []
-        now = callback_query.message.date
-        self.storage[user_id] = [t for t in self.storage[user_id] if now - t < self.interval]  # Clean old timestamps
+        now = datetime.datetime.now()
+        self.storage[user_id] = [t for t in self.storage[user_id] if
+                                 (now - t).seconds < self.interval]  # Clean old timestamps
         if len(self.storage[user_id]) >= self.limit:
             await callback_query.answer("You are sending messages too frequently. Please wait a moment.")
             raise asyncio.CancelledError()  # Cancel the handler
         self.storage[user_id].append(now)
-
