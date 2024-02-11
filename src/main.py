@@ -3,6 +3,7 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 
+from src.middlewares.limit import RateLimitMiddleware
 from src.handlers.systems import get_start, get_stop
 from src.config import BOT_TOKEN
 from src.handlers import basic, scammer, contact, admin
@@ -26,6 +27,9 @@ async def start():
     bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
 
     dp = Dispatcher()
+
+    dp.message.middleware.register(RateLimitMiddleware(5, 60))
+    dp.callback_query.middleware.register(RateLimitMiddleware(5, 60))
 
     dp.include_router(admin.router)
     dp.include_router(scammer.scammer_router)
