@@ -1,3 +1,7 @@
+from typing import Any, Awaitable, Callable, Dict, TypeVar
+
+from aiogram.types import TelegramObject
+
 from aiogram import types
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 import asyncio
@@ -10,32 +14,27 @@ class RateLimitMiddleware(BaseMiddleware):
         self.interval = interval
         self.storage = {}
 
-    async def __call__(self, bot, update, data):
-        if isinstance(update, types.Message):
-            await self.on_process_message(update, data)
-        elif isinstance(update, types.CallbackQuery):
-            await self.on_process_callback_query(update, data)
-
-    async def on_process_message(self, message: types.Message, data: dict):
-        user_id = message.from_user.id
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: Dict[str, Any],
+    ) -> Any:
+        user = data["event_from_user"]
+        user_id = user.id
         if user_id not in self.storage:
             self.storage[user_id] = []
         now = datetime.datetime.now()
-        self.storage[user_id] = [t for t in self.storage[user_id] if
-                                 (now - t).seconds < self.interval]  # Clean old timestamps
-        if len(self.storage[user_id]) >= self.limit:
-            await message.reply("You are sending messages too frequently. Please wait a moment.")
-            raise asyncio.CancelledError()  # Cancel the handler
-        self.storage[user_id].append(now)
+        self.storage[user_id] = [t for t in self.storage[user_id] if (now - t).seconds < self.interval]
 
-    async def on_process_callback_query(self, callback_query: types.CallbackQuery, data: dict):
-        user_id = callback_query.from_user.id
-        if user_id not in self.storage:
-            self.storage[user_id] = []
-        now = datetime.datetime.now()
-        self.storage[user_id] = [t for t in self.storage[user_id] if
-                                 (now - t).seconds < self.interval]  # Clean old timestamps
+        print(len(self.storage[user_id]))
+
         if len(self.storage[user_id]) >= self.limit:
-            await callback_query.answer("You are sending messages too frequently. Please wait a moment.")
-            raise asyncio.CancelledError()  # Cancel the handler
+            if isinstance(event, types.Message):
+                await event.answer("Слишком много запросов, попробуйте позже")
+            elif isinstance(event, types.CallbackQuery):
+                await event.message.answer("Слишком много запросов, попробуйте позже")
+            return
+
         self.storage[user_id].append(now)
+        return await handler(event, data)

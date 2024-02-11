@@ -28,8 +28,8 @@ async def start():
 
     dp = Dispatcher()
 
-    dp.message.middleware.register(RateLimitMiddleware(5, 60))
-    dp.callback_query.middleware.register(RateLimitMiddleware(5, 60))
+    dp.message.middleware.register(RateLimitMiddleware(40, 60))
+    dp.callback_query.middleware.register(RateLimitMiddleware(40, 60))
 
     dp.include_router(admin.router)
     dp.include_router(scammer.scammer_router)
