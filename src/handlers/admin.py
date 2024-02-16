@@ -9,6 +9,7 @@ from src.keyboards.admin import get_admin_inline_keyboard
 from src.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard
 from src.utils.scammers import get_scammer_data_from_message
 from src.entities.scammers.models import proof_repository
+from src.repository import IntegrityException
 
 
 class AdminForm(StatesGroup):
@@ -119,10 +120,13 @@ async def get_proofs(message: Message, bot: Bot, state: FSMContext):
         data = await state.get_data()
         scammer = data["scammer"]
         scammer_created = await scammers_service.add_scammer(scammer)
-        await proof_repository.create({
-            "scammer_id": scammer.id,
-            "text": message.text
-        })
+        try:
+            await proof_repository.create({
+                "scammer_id": scammer.id,
+                "text": message.text
+            })
+        except IntegrityException as e:
+            print(e)
         await scammers_service.confirm(scammer_created.id)
         await state.clear()
         await message.answer("Мошенник добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
