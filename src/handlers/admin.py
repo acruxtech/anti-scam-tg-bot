@@ -14,6 +14,7 @@ from src.repository import IntegrityException
 
 class AdminForm(StatesGroup):
     get_user = State()
+    get_username = State()
     get_proofs = State()
     delete_user = State()
 
@@ -105,13 +106,27 @@ async def delete_user(message: Message, bot: Bot, state: FSMContext):
 async def get_user(message: Message, bot: Bot, state: FSMContext):
     if message.user_shared or (message.forward_from is not None and message.forward_from.id != message.from_user.id):
         await message.answer("Профиль мошенника получен  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
-        await message.answer("Напишите причину, по которой мошенник заносится в базу:")
+        await message.answer("Напишите username мошенника:")
         scammer = get_scammer_data_from_message(message)
         await state.update_data(scammer=scammer)
-        await state.set_state(AdminForm.get_proofs)
+        await state.set_state(AdminForm.get_username)
     else:
         await message.answer("Пользователь либо скрыл данные о себе, либо вы скинули что-то не то \n\n"
                              "Попробуйте отправить пользователя кнопкной ниже 👇👇👇")
+
+
+@router.message(AdminForm.get_username)
+async def get_username(message: Message, state: FSMContext):
+    if message.text:
+        data = await state.get_data()
+        scammer = data["scammer"]
+        scammer.username = message.text.replace("https://t.me/", "").replace("@", "")
+        await state.update_data(scammer=scammer)
+        await message.answer("Username мошенника получен  ✅")
+        await message.answer("Напишите причину, по которой мошенник заносится в базу:")
+        await state.set_state(AdminForm.get_proofs)
+    else:
+        await message.answer("Пожалуйста, отправьте корректный username")
 
 
 @router.message(AdminForm.get_proofs)
@@ -121,15 +136,13 @@ async def get_proofs(message: Message, bot: Bot, state: FSMContext):
         scammer = data["scammer"]
         scammer_created = await scammers_service.add_scammer(scammer)
         await scammers_service.confirm(scammer_created.id)
-        try:
-            await proof_repository.create({
-                "scammer_id": scammer.id,
-                "text": message.text,
-                "decision": True,
-                "moderator_id": message.from_user.id
-            })
-        except IntegrityException as e:
-            print(e)
+        await proof_repository.create({
+            "scammer_id": scammer.id,
+            "text": message.text,
+            "user_id": message.from_user.id,
+            "decision": True,
+            "moderator_id": message.from_user.id
+        })
         await scammers_service.confirm(scammer_created.id)
         await state.clear()
         await message.answer("Мошенник добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
