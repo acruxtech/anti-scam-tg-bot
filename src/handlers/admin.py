@@ -120,10 +120,13 @@ async def get_proofs(message: Message, bot: Bot, state: FSMContext):
         data = await state.get_data()
         scammer = data["scammer"]
         scammer_created = await scammers_service.add_scammer(scammer)
+        await scammers_service.confirm(scammer_created.id)
         try:
             await proof_repository.create({
                 "scammer_id": scammer.id,
-                "text": message.text
+                "text": message.text,
+                "decision": True,
+                "moderator_id": message.from_user.id
             })
         except IntegrityException as e:
             print(e)
