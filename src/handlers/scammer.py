@@ -1,4 +1,5 @@
 import logging
+import random
 
 from aiogram import Bot, Router, F
 from aiogram.types import Message, CallbackQuery
@@ -44,7 +45,8 @@ class AddScammerForm(StatesGroup):
 @scammer_router.message(F.text == "Кинуть репорт  ✍")
 async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
     await message.answer(
-        f"Перешли сообщение мошенника или отправь мне его контакт", reply_markup=get_send_user_keyboard()
+        f"Перешли сообщение мошенника или отправь мне его контакт\n\n"
+        f"Если нет такой возможности, то отправь мне его username", reply_markup=get_send_user_keyboard()
     )
     await state.set_state(AddScammerForm.get_profile)
 
@@ -69,6 +71,19 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
         else:
             await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
             await state.set_state(AddScammerForm.get_proofs)
+    elif message.text:
+        username = message.text.replace("https://t.me/", "").replace("@", "")
+        scammer = ScammerScheme(id=random.randrange(1, 10000), username=username)
+
+        scammer_existing = await scammers_service.get_scammer(scammer.id)
+
+        while scammer_existing:
+            scammer = ScammerScheme(id=random.randrange(1, 10000), username=username)
+            scammer_existing = await scammers_service.get_scammer(scammer.id)
+
+        await state.update_data(scammer=scammer)
+        await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
+        await state.set_state(AddScammerForm.get_proofs)
     else:
         await message.answer(
             "Пользователь либо скрыл данные о себе, либо вы отправили что-то не то \n\n"
