@@ -30,6 +30,33 @@ async def start(message: Message, bot: Bot):
     await user_service.add_user(user)
 
 
+@basic_router.message(Command("add_to_channel"))
+async def start(message: Message, bot: Bot):
+    photo_path = r"./media/systems/admin.PNG"
+    await message.answer_photo(
+        FSInputFile(photo_path),
+        caption="Чтобы я мог следить за мошенниками в вашем канале, сделайте следующее:\n\n"
+                "<b>1.</b> Добавить меня в ваш канал\n"
+                "<b>2.</b> Сделать меня администратором и выдать права, как на картинке\n\n"
+                "После этих действий я отпишу вам, что всё прошло успешно."
+    )
+
+
+@basic_router.message(F.chat_shared)
+async def get_chat(message: Message, bot: Bot):
+    scammer = await scammers_service.get_scammer(message.chat_shared.chat_id)
+
+    proof = None
+
+    if scammer:
+        proof = await create_message_about_scammer(scammer, message)
+    else:
+        await message.answer("Данный канал не был найден в базе, но будьте осторожны")
+
+    if proof:
+        await create_media(scammer, proof, message, bot)
+
+
 @basic_router.message(F.user_shared)
 async def get_contact(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)

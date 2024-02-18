@@ -12,6 +12,11 @@ def get_scammer_data_from_message(message: Message) -> ScammerScheme:
             "id": message.user_shared.user_id
         }
         return ScammerScheme(**data)
+    elif message.chat_shared:
+        data = {
+            "id": message.chat_shared.chat_id
+        }
+        return ScammerScheme(**data)
 
 
 async def create_message_about_scammer(scammer, message: Message):

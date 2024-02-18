@@ -20,6 +20,17 @@ class ScammerService:
     async def get_scammer_list(self):
         return await self.repository.get_list(self.repository.model.is_scam == True)
 
+    async def get_scammer_by_all(self, user_id: int, username: str):
+        scammer_by_id = await self.repository.get(user_id)
+        scammer_by_username = await self.repository.get_by_username(username)
+
+        if scammer_by_id:
+            return scammer_by_id
+        elif scammer_by_username:
+            return scammer_by_username
+        else:
+            return None
+
     async def get_scammer(self, user_id: int):
         return await self.repository.get(user_id)
 

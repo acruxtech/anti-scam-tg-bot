@@ -15,6 +15,8 @@ from src.keyboards.basic import (
     get_main_menu_keyboard,
     get_send_media_scammer_keyboard,
     get_contact_cancel_keyboard,
+    get_report_keyboard,
+    get_send_channel_keyboard
 )
 from src.keyboards.menu import get_report_message
 from src.messages import get_about_scammer_message
@@ -32,6 +34,7 @@ F: Message
 
 
 class AddScammerForm(StatesGroup):
+    get_who_report = State()
     get_profile = State()
     add_profile = State()
     detect_hide_profile = State()
@@ -45,8 +48,25 @@ class AddScammerForm(StatesGroup):
 @scammer_router.message(F.text == "Кинуть репорт  ✍")
 async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
     await message.answer(
+        "На кого вы кидаете репорт?\n\n", reply_markup=get_report_keyboard()
+    )
+    await state.set_state(AddScammerForm.get_who_report)
+
+
+@scammer_router.message(AddScammerForm.get_who_report, F.text == "На пользователя  👤")
+async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
+    await message.answer(
         f"Перешли сообщение мошенника или отправь мне его контакт\n\n"
         f"Если нет такой возможности, то отправь мне его username", reply_markup=get_send_user_keyboard()
+    )
+    await state.set_state(AddScammerForm.get_profile)
+
+
+@scammer_router.message(AddScammerForm.get_who_report, F.text == "На канал  📢")
+async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
+    await message.answer(
+        f"Перешли сообщение канала или отправь мне его через кнопку\n\n"
+        f"Если нет такой возможности, то отправь мне его username", reply_markup=get_send_channel_keyboard()
     )
     await state.set_state(AddScammerForm.get_profile)
 
@@ -65,12 +85,12 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
 
         await state.update_data(scammer=scammer)
 
-        if message.from_user.id in OWNER_IDS:
-            await message.answer("Пришлите username пользователя:")
-            await state.set_state(AddScammerForm.get_username)
-        else:
-            await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
-            await state.set_state(AddScammerForm.get_proofs)
+        #if message.from_user.id in OWNER_IDS:
+        await message.answer("Пришлите username пользователя:")
+        await state.set_state(AddScammerForm.get_username)
+        #else:
+        #    await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
+        #    await state.set_state(AddScammerForm.get_proofs)
     elif message.text:
         username = message.text.replace("https://t.me/", "").replace("@", "")
         scammer = ScammerScheme(id=random.randrange(1, 10000), username=username)
@@ -83,6 +103,11 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
 
         await state.update_data(scammer=scammer)
         await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
+        await state.set_state(AddScammerForm.get_proofs)
+    elif message.chat_shared:
+        scammer = get_scammer_data_from_message(message)
+        await state.update_data(scammer=scammer)
+        await message.answer("Распиши ситуацию, которая произошла у тебя с каналом:")
         await state.set_state(AddScammerForm.get_proofs)
     else:
         await message.answer(

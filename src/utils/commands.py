@@ -7,6 +7,10 @@ async def set_commands(bot: Bot):
         BotCommand(
             command='start',
             description='Главное меню'
+        ),
+        BotCommand(
+            command='add_to_channel',
+            description='Добавить в канал'
         )
     ]
 
