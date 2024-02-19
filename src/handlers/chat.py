@@ -25,7 +25,7 @@ async def bot_added_as_admin(event: ChatMemberUpdated, bot: Bot):
     )
 
 
-@router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_MEMBER))
+@router.chat_member(ChatMemberUpdatedFilter(IS_NOT_MEMBER >> IS_MEMBER))
 async def check_new_member(event: ChatMemberUpdated, bot: Bot):
     scammer = await scammers_service.get_scammer_by_all(event.from_user.id, event.from_user.username)
 
