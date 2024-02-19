@@ -14,8 +14,8 @@ router = Router()
 async def bot_added_as_admin(event: ChatMemberUpdated, bot: Bot):
     await bot.send_message(
         event.chat.id,
-        "Привет! Я бот защиты от мошенников. Моя задача - обеспечить безопасность чата."
-        "Если у вас есть подозрения или вопросы касательно какой-то личности, не стесняйтесь обращаться ко мне."
+        "Привет! Я бот защиты от мошенников. Моя задача - обеспечить безопасность чата. "
+        "Если у вас есть подозрения или вопросы касательно какой-то личности, не стесняйтесь обращаться ко мне. "
         "Давайте работать вместе для защиты нашего чата от недобросовестных действий! 💪🛡"
     )
     await bot.send_message(
@@ -25,7 +25,7 @@ async def bot_added_as_admin(event: ChatMemberUpdated, bot: Bot):
     )
 
 
-@router.chat_member(ChatMemberUpdatedFilter(IS_NOT_MEMBER >> IS_MEMBER))
+@router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_MEMBER))
 async def check_new_member(event: ChatMemberUpdated, bot: Bot):
     scammer = await scammers_service.get_scammer_by_all(event.from_user.id, event.from_user.username)
 
