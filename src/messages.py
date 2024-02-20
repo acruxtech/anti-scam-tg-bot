@@ -7,7 +7,7 @@ def get_start_message(message: Message) -> str:
 
 <b>Проверяй</b> исполнителя услуг на честность <b>с помощью нашего бота.</b>
 
-<b>Узнавай больше про ТГ:</b> @keRoy / <a href="https://t.me/+PXCfc4FyhMVjMzQ6">Rakhimov ВЕЩАЕТ</a>
+<b>Узнавай больше про ТГ:</b> <a href="https://t.me/+qyKIFJSJ0DwzZmUy">@keRoy</a> / <a href="https://t.me/+PXCfc4FyhMVjMzQ6">Rakhimov ВЕЩАЕТ</a>
 
 <b>Агентство</b> – <a href="https://t.me/spaceagency1">Space Agency</a>
 
