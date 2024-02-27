@@ -11,7 +11,7 @@ def get_start_message(message: Message) -> str:
 
 <b>Агентство</b> – <a href="https://t.me/spaceagency1">Space Agency</a>
 
-<b>Наши чаты –</b> <a href="https://t.me/+qNqoUOqi3-gzM2Yy">Админские Веселья</a> / <a href="https://t.me/zorchatik">Комитет Админов</a>
+<b>Наши чаты –</b> <a href="https://t.me/+qNqoUOqi3-gzM2Yy">Админские Веселья</a> / <a href="https://t.me/+Ech10tlczSs1ZmFi">Комитет Админов</a>
 """
     return start_message
 

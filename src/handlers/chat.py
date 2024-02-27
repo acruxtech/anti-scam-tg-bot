@@ -39,5 +39,5 @@ async def bot_deleted(event: ChatMemberUpdated, bot: Bot):
     await bot.send_message(
         event.from_user.id,
         f"Вы удалили меня из группы <b>{event.chat.title}</b>!"
-        f"Теперь ваш канал находится по угрозой!"
+        f"Теперь ваш канал находится под угрозой!"
     )
