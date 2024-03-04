@@ -135,7 +135,7 @@ JOIN proofs sr ON srm.scammer_id = sr.scammer_id AND sr.decision = true;
         sql_query = text("""
         SELECT
         COUNT(*) AS total_users,
-        COUNT(CASE WHEN datetime_first >= NOW() - INTERVAL 1 DAY THEN 1 END) AS registered_last_24h
+        COUNT(CASE WHEN datetime_first >= NOW() - INTERVAL DAY THEN 1 END) AS registered_last_24h
         FROM users;
         """)
         async with async_session_maker() as session:
