@@ -48,6 +48,7 @@ async def get_count_users(call: CallbackQuery, bot: Bot):
         f"Количество пользователей - {count}\n\n"
         f"Количество пользователей за сутки - {count24}"
     )
+    await call.answer()
 
 
 @router.callback_query(F.data == "get_scammer_list")
