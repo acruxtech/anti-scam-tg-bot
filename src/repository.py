@@ -133,10 +133,10 @@ JOIN proofs sr ON srm.scammer_id = sr.scammer_id AND sr.decision = true;
 
     async def count_and_24(self) -> (int, int):
         sql_query = text("""
-        SELECT
-        COUNT(*) AS total_users,
-        COUNT(CASE WHEN datetime_first >= NOW() - INTERVAL DAY THEN 1 END) AS registered_last_24h
-        FROM users;
+        SELECT 
+            (SELECT COUNT(*) FROM users) AS total_records,
+            (SELECT COUNT(*) FROM users WHERE datetime_first >= DATE_SUB(NOW(), INTERVAL 24 HOUR)) AS records_last_24_hours;
+
         """)
         async with async_session_maker() as session:
             result = await session.execute(sql_query)
