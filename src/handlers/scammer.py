@@ -56,8 +56,8 @@ async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
 @scammer_router.message(AddScammerForm.get_who_report, F.text == "На пользователя  👤")
 async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
     await message.answer(
-        f"Перешли сообщение мошенника или отправь мне его контакт\n\n"
-        f"Если нет такой возможности, то отправь мне его username", reply_markup=get_send_user_keyboard()
+        f"Перешли сообщение мошенника или отправь мне его контакт\n\n",
+        reply_markup=get_send_user_keyboard()
     )
     await state.set_state(AddScammerForm.get_profile)
 
@@ -65,8 +65,8 @@ async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
 @scammer_router.message(AddScammerForm.get_who_report, F.text == "На канал  📢")
 async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
     await message.answer(
-        f"Перешли сообщение канала или отправь мне его через кнопку\n\n"
-        f"Если нет такой возможности, то отправь мне его username", reply_markup=get_send_channel_keyboard()
+        f"Перешли сообщение канала или отправь мне его через кнопку\n\n",
+        reply_markup=get_send_channel_keyboard()
     )
     await state.set_state(AddScammerForm.get_profile)
 
@@ -91,19 +91,6 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
         #else:
         #    await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
         #    await state.set_state(AddScammerForm.get_proofs)
-    elif message.text:
-        username = message.text.replace("https://t.me/", "").replace("@", "")
-        scammer = ScammerScheme(id=random.randrange(1, 10000), username=username)
-
-        scammer_existing = await scammers_service.get_scammer(scammer.id)
-
-        while scammer_existing:
-            scammer = ScammerScheme(id=random.randrange(1, 10000), username=username)
-            scammer_existing = await scammers_service.get_scammer(scammer.id)
-
-        await state.update_data(scammer=scammer)
-        await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
-        await state.set_state(AddScammerForm.get_proofs)
     elif message.chat_shared:
         scammer = get_scammer_data_from_message(message)
         await state.update_data(scammer=scammer)

@@ -131,6 +131,19 @@ JOIN proofs sr ON srm.scammer_id = sr.scammer_id AND sr.decision = true;
             print("-" * 100)
             return scammer_report_media
 
+        async def count_and_24() -> (int, int):
+            sql_query = text("""
+            SELECT
+            COUNT(*) AS total_users,
+            COUNT(CASE WHEN datetime_first >= NOW() - INTERVAL 1 DAY THEN 1 END) AS registered_last_24h
+            FROM users;
+            """)
+            async with async_session_maker() as session:
+                result = await session.execute(sql_query)
+                data = result.all()
+                count, count24 = data[0], data[1]
+                return count, count24
+
 
 class IntegrityException(Exception):
     pass

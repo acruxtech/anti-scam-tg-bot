@@ -10,6 +10,7 @@ from src.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard
 from src.utils.scammers import get_scammer_data_from_message
 from src.entities.scammers.models import proof_repository
 from src.repository import IntegrityException
+from src.entities.users.models import user_repository
 
 
 class AdminForm(StatesGroup):
@@ -38,6 +39,15 @@ async def open_admin(message: Message, bot: Bot):
 
 
 F: CallbackQuery
+
+
+@router.callback_query(F.data == "get_count_users")
+async def get_count_users(call: CallbackQuery, bot: Bot):
+    count, count24 = await user_repository.count_and_24()
+    await call.message.answer(
+        f"Количество пользователей - {count}\n\n"
+        f"Количество пользователей за сутки - {count24}"
+    )
 
 
 @router.callback_query(F.data == "get_scammer_list")

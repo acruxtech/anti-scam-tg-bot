@@ -13,6 +13,9 @@ def get_admin_inline_keyboard():
     inline_keyboard_builder.button(
         text="Получить весь список скамеров (Excel-файл)  📊", callback_data="get_scammer_list"
     )
+    inline_keyboard_builder.button(
+       text="Узнать количество пользователей  👥", callback_data="get_count_users"
+    )
 
     inline_keyboard_builder.adjust(2, 1)
 
