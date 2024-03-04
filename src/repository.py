@@ -140,6 +140,7 @@ JOIN proofs sr ON srm.scammer_id = sr.scammer_id AND sr.decision = true;
         async with async_session_maker() as session:
             result = await session.execute(sql_query)
             data = result.all()
+            print(data)
             count, count24 = data[0], data[1]
             return count, count24
 
