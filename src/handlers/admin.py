@@ -46,7 +46,7 @@ async def get_count_users(call: CallbackQuery, bot: Bot):
     count, count24 = await user_repository.count_and_24()
     await call.message.answer(
         f"Количество пользователей - {count}\n\n"
-        f"Количество пользователей за сутки - {count24}"
+        f"Количество новых пользователей за сутки - {count24}"
     )
     await call.answer()
 
