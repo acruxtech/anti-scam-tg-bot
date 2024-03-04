@@ -131,7 +131,7 @@ JOIN proofs sr ON srm.scammer_id = sr.scammer_id AND sr.decision = true;
             print("-" * 100)
             return scammer_report_media
 
-    async def count_and_24() -> (int, int):
+    async def count_and_24(self) -> (int, int):
         sql_query = text("""
         SELECT
         COUNT(*) AS total_users,
