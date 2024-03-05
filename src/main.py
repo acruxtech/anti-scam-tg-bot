@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher
 from src.middlewares.limit import RateLimitMiddleware
 from src.handlers.systems import get_start, get_stop
 from src.config import BOT_TOKEN
-from src.handlers import basic, scammer, contact, admin, chat
+from src.handlers import basic, scammer, contact, admin, chat, add
 from src.entities.scammers.service import scammers_repository
 
 from data import scammer_ids_and_usernames
@@ -36,6 +36,7 @@ async def start():
     dp.include_router(basic.basic_router)
     dp.include_router(contact.router)
     dp.include_router(chat.router)
+    dp.include_router(add.router)
 
     dp.startup.register(get_start)
     dp.shutdown.register(get_stop)
