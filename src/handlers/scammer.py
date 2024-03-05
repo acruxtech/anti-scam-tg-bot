@@ -19,6 +19,8 @@ from src.keyboards.basic import (
     get_send_channel_keyboard
 )
 from src.keyboards.menu import get_report_message
+from src.keyboards.admin import get_text_edit_keyboard
+
 from src.messages import get_about_scammer_message
 
 from src.entities.scammers.schemas import ScammerScheme, ScammerAnsweredScheme, ProofScheme
@@ -43,6 +45,7 @@ class AddScammerForm(StatesGroup):
     get_media = State()
     add_scam_to_database = State()
     get_explanation = State()
+    get_edited_text = State()
 
 
 @scammer_router.message(F.text == "Кинуть репорт  ✍")
@@ -161,7 +164,7 @@ async def send_post_to_moderator_chat(
     )
 
     album_builder = MediaGroupBuilder(
-        caption=proof_from_db.text
+        caption=f"<code>{proof_from_db.text}</code>"
     )
 
     for media_item in media:
@@ -195,17 +198,19 @@ async def accept_decision(call: CallbackQuery, bot: Bot, state: FSMContext, call
     )
 
     if callback_data.decision:
-        await scammers_service.confirm(callback_data.scammer_id)
-        await bot.edit_message_text(
-            f"{call.from_user.username} добавил мошенника в базу  ✅",
-            call.message.chat.id,
-            call.message.message_id
+        await state.update_data(data={
+            "proof_id": callback_data.id,
+            "call_message_chat_id": call.message.chat.id,
+            "call_message_message_id": call.message.message_id,
+            "callback_data.user_id": callback_data.user_id,
+            "callback_data.scammer_id": callback_data.scammer_id
+        })
+        await call.message.answer(
+            "Напишите отредактированную причину занесения мошенника в базу\n\n"
+            "Если текст вас устраивает, нажмите на кнопку ниже  👇👇👇",
+            reply_markup=get_text_edit_keyboard()
         )
-        await bot.send_message(
-            callback_data.user_id,
-            "Мы рассмотрели ваш репорт на пользователя и занесли его в базу! 👮‍♂\n\n"
-            "Благодарим за помощь в борьбе с мошенниками!  🤝"
-        )
+        await state.set_state(AddScammerForm.get_edited_text)
     else:
         await bot.edit_message_text(
             f"{call.from_user.username} отклонил данный репорт  ❌",
@@ -219,6 +224,41 @@ async def accept_decision(call: CallbackQuery, bot: Bot, state: FSMContext, call
         )
 
     await call.answer()
+
+
+@scammer_router.message(AddScammerForm.get_edited_text, F.text)
+async def get_edited_text(message: Message, bot: Bot, state: FSMContext):
+
+    data = await state.get_data()
+    print(data)
+
+    proof_id = data["proof_id"]
+    call_message_chat_id = data["call_message_chat_id"]
+    call_message_message_id = data["call_message_message_id"]
+    callback_data_user_id = data["callback_data.user_id"]
+    callback_data_scammer_id = data["callback_data.scammer_id"]
+
+    if message.text != "Продолжить без изменений":
+        await proof_repository.update(
+            {"text": message.text},
+            proof_id,
+        )
+
+    await scammers_service.confirm(callback_data_scammer_id)
+    try:
+        await bot.edit_message_text(
+            f"{message.from_user.username} добавил мошенника в базу  ✅",
+            call_message_chat_id,
+            call_message_message_id
+        )
+    except TelegramBadRequest:
+        pass
+    await bot.send_message(
+        callback_data_user_id,
+        "Мы рассмотрели ваш репорт на пользователя и занесли его в базу! 👮‍♂\n\n"
+        "Благодарим за помощь в борьбе с мошенниками!  🤝"
+    )
+    await state.clear()
 
 
 @scammer_router.message(AddScammerForm.get_media, F.video)
