@@ -243,6 +243,9 @@ async def get_edited_text(message: Message, bot: Bot, state: FSMContext):
             {"text": message.text},
             proof_id,
         )
+        await message.answer("Мошенник был добавлен в базу с новым текстом  ✅")
+    else:
+        await message.answer("Мошенник был добавлен без изменения текста  ✅")
 
     await scammers_service.confirm(callback_data_scammer_id)
     try:
