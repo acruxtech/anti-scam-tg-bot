@@ -30,7 +30,9 @@ async def create_media(scammer, proof, message: Message, bot: Bot, msg: str):
 
     if len(media) > 0:
         album_builder = MediaGroupBuilder(
-            caption=f"{msg}\n\n<b>Причина:</b> {proof.text}" + DEFAULT_TEXT_SUFFIX_PROOF
+            caption=f"{msg}\n\n<b>Причина:</b> {proof.text.replace(
+                DEFAULT_TEXT_SUFFIX_PROOF, ""
+            )}" + DEFAULT_TEXT_SUFFIX_PROOF
         )
 
         for media_object in media:
