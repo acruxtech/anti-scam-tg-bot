@@ -8,7 +8,7 @@ from src.entities.scammers.models import media_repository, ScammerMedia
 DEFAULT_TEXT_SUFFIX_PROOF = "\n\nРекомендую проверять пользователей через @AntiSkamTG_bot"
 
 
-async def create_media(scammer, proof, message: Message, bot: Bot):
+async def create_media(scammer, proof, message: Message, bot: Bot, msg: str):
     media = await media_repository.get_last_true_proofs(scammer.id)
     media = set(tuple(item) for item in media)
     media = list(media)
@@ -30,7 +30,7 @@ async def create_media(scammer, proof, message: Message, bot: Bot):
 
     if len(media) > 0:
         album_builder = MediaGroupBuilder(
-            caption=f"<b>Причина:</b> {proof.text}" + DEFAULT_TEXT_SUFFIX_PROOF
+            caption=f"{msg}\n\n<b>Причина:</b> {proof.text}" + DEFAULT_TEXT_SUFFIX_PROOF
         )
 
         for media_object in media:

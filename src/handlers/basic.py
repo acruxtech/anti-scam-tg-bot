@@ -47,14 +47,15 @@ async def get_chat(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.chat_shared.chat_id)
 
     proof = None
+    msg = ""
 
     if scammer:
-        proof = await create_message_about_scammer(scammer, message)
+        proof, msg = await create_message_about_scammer(scammer)
     else:
         await message.answer("Данный канал не был найден в базе, но будьте осторожны")
 
     if proof:
-        await create_media(scammer, proof, message, bot)
+        await create_media(scammer, proof, message, bot, msg)
 
 
 @basic_router.message(F.user_shared)
@@ -62,14 +63,15 @@ async def get_contact(message: Message, bot: Bot):
     scammer = await scammers_service.get_scammer(message.user_shared.user_id)
 
     proof = None
+    msg = ""
 
     if scammer:
-        proof = await create_message_about_scammer(scammer, message)
+        proof, msg = await create_message_about_scammer(scammer)
     else:
         await message.answer("Данный пользователь не был найден в базе, но будьте осторожны")
 
     if proof:
-        await create_media(scammer, proof, message, bot)
+        await create_media(scammer, proof, message, bot, msg)
 
 
 class ScammerSearchState(StatesGroup):
@@ -104,13 +106,13 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
             await state.clear()
             return
 
-        proof = None
+        proof, msg = None, ""
 
         if scammer:
-            proof = await create_message_about_scammer(scammer, message)
+            proof, msg = await create_message_about_scammer(scammer)
 
         if proof:
-            await create_media(scammer, proof, message, bot)
+            await create_media(scammer, proof, message, bot, msg)
 
         await state.clear()
 
@@ -121,14 +123,14 @@ async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
 
     scammer = await scammers_service.get_scammer_by_username(username)
 
-    proof = None
+    proof, msg = None, ""
 
     if scammer:
-        proof = await create_message_about_scammer(scammer, message)
+        proof, msg = await create_message_about_scammer(scammer, message)
     else:
         await message.answer("Пользователь не был найден в базе")
 
     if proof:
-        await create_media(scammer, proof, message, bot)
+        await create_media(scammer, proof, message, bot, msg)
 
     await state.clear()

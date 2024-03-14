@@ -19,7 +19,7 @@ def get_scammer_data_from_message(message: Message) -> ScammerScheme:
         return ScammerScheme(**data)
 
 
-async def create_message_about_scammer(scammer, message: Message):
+async def create_message_about_scammer(scammer):
     proof = None
 
     info_about_scammer = f"<b>Информация о пользователе:</b>\n\n"
@@ -38,7 +38,7 @@ async def create_message_about_scammer(scammer, message: Message):
     else:
         scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
 
-    await message.answer(f"{scammer_message}\n\n"
-                         f"{info_about_scammer}")
+    msg = (f"{scammer_message}\n\n"
+          f"{info_about_scammer}")
 
-    return proof
+    return proof, msg
