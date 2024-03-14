@@ -237,9 +237,6 @@ async def accept_decision(call: CallbackQuery, bot: Bot, state: FSMContext, call
     await call.answer()
 
 
-DEFAULT_TEXT_SUFFIX_PROOF = "\n\nРекомендую проверять пользователей через @AntiSkamTG_bot"
-
-
 @scammer_router.message(AddScammerForm.get_edited_text, F.text)
 async def get_edited_text(message: Message, bot: Bot, state: FSMContext):
 
@@ -254,7 +251,7 @@ async def get_edited_text(message: Message, bot: Bot, state: FSMContext):
 
     if message.text != "Продолжить без изменений":
         await proof_repository.update(
-            {"text": message.text + DEFAULT_TEXT_SUFFIX_PROOF},
+            {"text": message.text},
             proof_id,
         )
         await message.answer("Мошенник был добавлен в базу с новым текстом  ✅")
