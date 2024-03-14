@@ -172,8 +172,10 @@ async def send_post_to_moderator_chat(
         media_repository.model.proof_id == proof_from_db.id
     )
 
+    text = proof_from_db.text.replace(DEFAULT_TEXT_SUFFIX_PROOF, "")
+
     album_builder = MediaGroupBuilder(
-        caption=f"<code>{proof_from_db.text.replace(DEFAULT_TEXT_SUFFIX_PROOF, "")}</code>"
+        caption=f"<code>{text}</code>"
     )
 
     for media_item in media:
