@@ -16,7 +16,8 @@ from src.keyboards.basic import (
     get_send_media_scammer_keyboard,
     get_contact_cancel_keyboard,
     get_report_keyboard,
-    get_send_channel_keyboard
+    get_send_channel_keyboard,
+    get_username_keyboard
 )
 from src.keyboards.menu import get_report_message
 from src.keyboards.admin import get_text_edit_keyboard
@@ -89,7 +90,11 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
         await state.update_data(scammer=scammer)
 
         #if message.from_user.id in OWNER_IDS:
-        await message.answer("Пришлите username пользователя:")
+        await message.answer(
+            "Пришлите username пользователя:\n\n"
+                "Если его нет, нажмите кнопку ниже  👇👇👇",
+            reply_markup=get_username_keyboard()
+        )
         await state.set_state(AddScammerForm.get_username)
         #else:
         #    await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
@@ -110,7 +115,11 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
 @scammer_router.message(AddScammerForm.get_username)
 async def get_username(message: Message, bot: Bot, state: FSMContext):
     if message.text:
-        username = message.text.replace("https://t.me/", "").replace("@", "")
+        if message.text == "Продолжить без username":
+            username = ""
+        else:
+            username = message.text.replace("https://t.me/", "").replace("@", "")
+
         data = await state.get_data()
         data["scammer"].username = username
 

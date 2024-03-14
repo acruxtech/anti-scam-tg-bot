@@ -114,3 +114,9 @@ def get_empty_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
     keyboard_builder.adjust(1)
     return keyboard_builder.as_markup()
+
+
+def get_username_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder.button(text="Продолжить без username")
+    return keyboard_builder.as_markup()
