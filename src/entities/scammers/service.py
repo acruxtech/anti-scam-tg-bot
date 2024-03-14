@@ -5,9 +5,6 @@ from src.repository import RepositoryInterface, IntegrityException
 from src.entities.scammers.models import scammers_repository, media_repository, proof_repository
 
 
-DEFAULT_TEXT_SUFFIX_PROOF = "Рекомендую проверять пользователей через @AntiSkamTG_bot"
-
-
 class ScammerService:
 
     def __init__(
@@ -71,8 +68,6 @@ class ScammerService:
             scammer_from_db = await self.repository.get(scammer.id)
 
         proof_data = proof.model_dump()
-
-        proof_data["text"] = proof_data["text"] + "\n\n" + DEFAULT_TEXT_SUFFIX_PROOF
 
         del proof_data["id"]
 
