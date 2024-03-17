@@ -116,6 +116,7 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
 async def get_username(message: Message, bot: Bot, state: FSMContext):
     if message.text:
         if message.text == "Продолжить без username":
+            print("БЕЗ ЮЗЕРА")
             username = ""
         else:
             username = message.text.replace("https://t.me/", "").replace("@", "")
@@ -124,7 +125,10 @@ async def get_username(message: Message, bot: Bot, state: FSMContext):
         data["scammer"].username = username
 
         await state.update_data(scammer=data["scammer"])
-        await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
+        await message.answer(
+            "Распиши ситуацию, которая произошла у тебя с мошенником:\n\n"
+            "<b>Важно:</b> в тексте также укажите все актуальные юзернеймы, если такие есть:"
+        )
         await state.set_state(AddScammerForm.get_proofs)
     else:
         await message.answer("Пожалуйста, отправьте корректный username")
@@ -172,7 +176,7 @@ async def send_post_to_moderator_chat(
         media_repository.model.proof_id == proof_from_db.id
     )
 
-    text = proof_from_db.text.replace(DEFAULT_TEXT_SUFFIX_PROOF, "")
+    text = proof_from_db.text
 
     album_builder = MediaGroupBuilder(
         caption=f"<code>{text}</code>"

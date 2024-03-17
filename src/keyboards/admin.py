@@ -29,5 +29,5 @@ def get_text_edit_keyboard():
     kb.button(text="Продолжить без изменений")
 
     return kb.as_markup(
-        resize_keyboard=True, one_time_keyboard=False, input_field_placeholder="Напишите отредактированный текст..."
+        resize_keyboard=True, one_time_keyboard=True, input_field_placeholder="Напишите отредактированный текст..."
     )

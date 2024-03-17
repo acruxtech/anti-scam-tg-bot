@@ -126,7 +126,7 @@ async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
     proof, msg = None, ""
 
     if scammer:
-        proof, msg = await create_message_about_scammer(scammer, message)
+        proof, msg = await create_message_about_scammer(scammer)
     else:
         await message.answer("Пользователь не был найден в базе")
 

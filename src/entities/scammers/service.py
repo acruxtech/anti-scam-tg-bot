@@ -65,7 +65,7 @@ class ScammerService:
             scammer_from_db = await self.repository.create(scammer.model_dump())
         except IntegrityException as e:
             print(e)
-            scammer_from_db = await self.repository.get(scammer.id)
+            scammer_from_db = await self.repository.update(scammer.model_dump(), scammer.id)
 
         proof_data = proof.model_dump()
 
