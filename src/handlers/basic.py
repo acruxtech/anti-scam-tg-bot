@@ -101,6 +101,8 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
     else:
         scammer = await scammers_service.get_scammer(scammer_id)
 
+        print(scammer)
+
         if not scammer:
             await message.answer("Пользователь не был найден в базе")
             await state.clear()
@@ -110,6 +112,9 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
 
         if scammer:
             proof, msg = await create_message_about_scammer(scammer)
+            print(proof)
+
+        print(proof)
 
         if proof:
             await create_media(scammer, proof, message, bot, msg)
