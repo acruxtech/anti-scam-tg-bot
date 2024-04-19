@@ -1,5 +1,6 @@
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types import KeyboardButtonRequestUser, KeyboardButton, KeyboardButtonRequestChat
+from aiogram.types.reply_keyboard_remove import ReplyKeyboardRemove
 
 from src.config import OWNER_IDS
 
@@ -111,9 +112,10 @@ def get_contact_cancel_keyboard():
 
 
 def get_empty_keyboard():
-    keyboard_builder = ReplyKeyboardBuilder()
-    keyboard_builder.adjust(1)
-    return keyboard_builder.as_markup()
+    # keyboard_builder = ReplyKeyboardBuilder()
+    # keyboard_builder.adjust(1)
+    # return keyboard_builder.as_markup()
+    return ReplyKeyboardRemove(remove_keyboard=True)
 
 
 def get_username_keyboard():

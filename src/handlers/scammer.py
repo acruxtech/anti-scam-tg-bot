@@ -17,7 +17,8 @@ from src.keyboards.basic import (
     get_contact_cancel_keyboard,
     get_report_keyboard,
     get_send_channel_keyboard,
-    get_username_keyboard
+    get_username_keyboard,
+    get_empty_keyboard,
 )
 from src.keyboards.menu import get_report_message
 from src.keyboards.admin import get_text_edit_keyboard
@@ -39,6 +40,7 @@ F: Message
 class AddScammerForm(StatesGroup):
     get_who_report = State()
     get_profile = State()
+    get_link = State()
     add_profile = State()
     detect_hide_profile = State()
     get_username = State()
@@ -89,21 +91,21 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
 
         await state.update_data(scammer=scammer)
 
-        #if message.from_user.id in OWNER_IDS:
         await message.answer(
             "Пришлите username пользователя:\n\n"
                 "Если его нет, нажмите кнопку ниже  👇👇👇",
             reply_markup=get_username_keyboard()
         )
         await state.set_state(AddScammerForm.get_username)
-        #else:
-        #    await message.answer("Распиши ситуацию, которая произошла у тебя с мошенником:")
-        #    await state.set_state(AddScammerForm.get_proofs)
+
     elif message.chat_shared:
         scammer = get_scammer_data_from_message(message)
         await state.update_data(scammer=scammer)
-        await message.answer("Распиши ситуацию, которая произошла у тебя с каналом:")
-        await state.set_state(AddScammerForm.get_proofs)
+        await message.answer(
+            "Отправь юзернейм канала или его ссылку",
+            reply_markup=get_empty_keyboard(),
+        )
+        await state.set_state(AddScammerForm.get_link)
     else:
         await message.answer(
             "Пользователь либо скрыл данные о себе, либо вы отправили что-то не то \n\n"
@@ -112,11 +114,23 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
         )
 
 
+@scammer_router.message(AddScammerForm.get_link)
+async def get_link(message: Message, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    scammer: ScammerScheme = data["scammer"]
+    scammer.username = message.text.replace("https://t.me/", "").replace("@", "")
+    await state.update_data(scammer=scammer)
+    await message.answer(
+        "Распиши ситуацию, которая произошла у тебя с каналом:",
+        reply_markup=get_empty_keyboard(),
+    )
+    await state.set_state(AddScammerForm.get_proofs)
+
+
 @scammer_router.message(AddScammerForm.get_username)
 async def get_username(message: Message, bot: Bot, state: FSMContext):
     if message.text:
         if message.text == "Продолжить без username":
-            print("БЕЗ ЮЗЕРА")
             username = ""
         else:
             username = message.text.replace("https://t.me/", "").replace("@", "")
@@ -127,7 +141,8 @@ async def get_username(message: Message, bot: Bot, state: FSMContext):
         await state.update_data(scammer=data["scammer"])
         await message.answer(
             "Распиши ситуацию, которая произошла у тебя с мошенником:\n\n"
-            "<b>Важно:</b> в тексте также укажите все актуальные юзернеймы, если такие есть:"
+            "<b>Важно:</b> в тексте также укажите все актуальные юзернеймы, если такие есть:",
+            reply_markup=get_empty_keyboard(),
         )
         await state.set_state(AddScammerForm.get_proofs)
     else:
@@ -301,9 +316,9 @@ async def get_video(message: Message, bot: Bot, state: FSMContext):
 
     await state.update_data(media=media)
 
-    await message.edit_reply_markup(
-        reply_markup=get_send_media_scammer_keyboard()
-    )
+    # await message.edit_reply_markup(
+    #     reply_markup=get_send_media_scammer_keyboard()
+    # )
 
 
 @scammer_router.message(AddScammerForm.get_media, F.photo)
@@ -328,10 +343,10 @@ async def get_photo(message: Message, bot: Bot, state: FSMContext):
 
     await state.update_data(media=media)
 
-    await message.edit_reply_markup(
-        reply_markup=get_send_media_scammer_keyboard()
-    )
-
+    # await message.edit_reply_markup(
+    #     reply_markup=get_send_media_scammer_keyboard()
+    # )
+    
 
 @scammer_router.message(AddScammerForm.get_proofs, F.text)
 async def ask_proofs(message: Message, bot: Bot, state: FSMContext):
@@ -339,7 +354,7 @@ async def ask_proofs(message: Message, bot: Bot, state: FSMContext):
     scammer = data["scammer"]
     proof = ProofScheme(text=message.text, scammer_id=scammer.id, user_id=message.from_user.id)
     await message.answer(
-        "Отправь фото/видео для доказательства скама 🖼 🎥 \n\n"
+        "Отправь фото/видео для доказательства скама (не более 10 шт) 🖼 🎥 \n\n"
         "После отправки нажмите на кнопку ниже 👇👇👇",
         reply_markup=get_send_media_scammer_keyboard()
     )

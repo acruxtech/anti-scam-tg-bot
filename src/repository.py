@@ -38,6 +38,10 @@ class RepositoryInterface(ABC):
     @abstractmethod
     async def get_by_username(self, username: str):
         raise NotImplemented
+    
+    @abstractmethod
+    async def get_by_title(self, username: str):
+        raise NotImplemented
 
 
 class SQLAlchemyRepository(RepositoryInterface):
@@ -50,7 +54,7 @@ class SQLAlchemyRepository(RepositoryInterface):
             stmt = insert(self.model).returning(self.model).values(**data)
             try:
                 result = await session.execute(stmt)
-            except IntegrityError:
+            except IntegrityError as e:
                 raise IntegrityException
             else:
                 await session.commit()
@@ -88,6 +92,12 @@ class SQLAlchemyRepository(RepositoryInterface):
     async def get_by_username(self, username: str):
         async with async_session_maker() as session:
             query = select(self.model).where(self.model.username == username)
+            result = await session.execute(query)
+            return result.scalar()
+        
+    async def get_by_title(self, title: str):
+        async with async_session_maker() as session:
+            query = select(self.model).where(self.model.title == title)
             result = await session.execute(query)
             return result.scalar()
 
@@ -131,18 +141,30 @@ JOIN proofs sr ON srm.scammer_id = sr.scammer_id AND sr.decision = true;
             print("-" * 100)
             return scammer_report_media
 
-    async def count_and_24(self) -> (int, int):
-        sql_query = text("""
-        SELECT 
-        (SELECT COUNT(*) FROM users) AS total_records,
-        (SELECT  COUNT(*)FROM users WHERE  datetime_first >= NOW() - '1 day'::INTERVAL) AS records_last_24_hours;
-        """)
+    async def count_users(self) -> tuple[int]:
+        """Return misc counts about users
+
+        Returns:
+            tuple[int]: (total_amount, new_amount, blocked_users, active_users)
+        """
+        sql_query = text(
+        """
+            SELECT 
+            (SELECT COUNT(*) FROM users) 
+                AS total_records,
+            (SELECT  COUNT(*) FROM users WHERE datetime_first >= NOW() - '1 day'::INTERVAL) 
+                AS records_last_24_hours,
+            (SELECT COUNT(*) FROM users WHERE is_blocked=true)
+                AS blocked_records;
+        """
+        )
         async with async_session_maker() as session:
             result = await session.execute(sql_query)
-            data = result.all()
-            data = data[0]
-            count, count24 = data[0], data[1]
-            return count, count24
+
+        data = result.all()
+        data = data[0]
+        count, count24, blocked_count = data
+        return count, count24, blocked_count, count - blocked_count
 
 
 class IntegrityException(Exception):

@@ -1,6 +1,6 @@
 from aiogram import Bot, Router, F
-from aiogram.types import Message, FSInputFile
-from aiogram.filters import Command
+from aiogram.types import Message, FSInputFile, ChatMemberUpdated
+from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
@@ -9,6 +9,7 @@ from src.keyboards.basic import get_main_menu_keyboard
 from src.entities.users.schemas import UserScheme
 from src.entities.users.service import user_service
 from src.entities.scammers.service import scammers_service
+from src.entities.refs.service import ref_service
 from src.entities.scammers.models import proof_repository
 from src.utils.media import create_media
 from src.utils.scammers import create_message_about_scammer
@@ -18,15 +19,32 @@ basic_router = Router()
 F: Message
 
 
+@basic_router.my_chat_member()
+async def my_chat_member_handler(update: ChatMemberUpdated):
+    if update.new_chat_member.status == 'kicked':
+        await user_service.update_user_status(update.chat.id, True)
+    if update.old_chat_member.status == "kicked":
+        await user_service.update_user_status(update.chat.id, False)
+
+
 @basic_router.message(Command("start"))
-async def start(message: Message, bot: Bot):
+async def start(message: Message, command: CommandObject, bot: Bot):
     photo_path = r"./media/systems/menu.png"
     await message.answer_photo(
         FSInputFile(photo_path),
         caption=get_start_message(message),
         reply_markup=get_main_menu_keyboard(message.from_user.id)
     )
+
     user = UserScheme(**message.from_user.model_dump())
+    
+    ref_title = command.args
+    if ref_title:
+        ref = await ref_service.get_ref_by_title(ref_title)
+        if not ref:
+            return
+        user.ref_id = ref.id
+
     await user_service.add_user(user)
 
 
@@ -68,7 +86,7 @@ async def get_contact(message: Message, bot: Bot):
     if scammer:
         proof, msg = await create_message_about_scammer(scammer)
     else:
-        await message.answer("Данный пользователь не был найден в базе, но будьте осторожны")
+        await message.answer(f"Данный пользователь в базе не найден, но будьте осторожны! ID {message.text}")
 
     if proof:
         await create_media(scammer, proof, message, bot, msg)
@@ -104,7 +122,7 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
         print(scammer)
 
         if not scammer:
-            await message.answer("Пользователь не был найден в базе")
+            await message.answer(f"Данный пользователь в базе не найден, но будьте осторожны! ID {message.text}")
             await state.clear()
             return
 
@@ -133,7 +151,7 @@ async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
     if scammer:
         proof, msg = await create_message_about_scammer(scammer)
     else:
-        await message.answer("Пользователь не был найден в базе")
+        await message.answer(f"Данный пользователь в базе не найден, но будьте осторожны! Юзернейм {message.text}")
 
     if proof:
         await create_media(scammer, proof, message, bot, msg)

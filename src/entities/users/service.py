@@ -19,5 +19,9 @@ class UserService:
             update_user["datetime_last"] = datetime.now()
             await self.repository.update(update_user, user.id)
 
+    async def update_user_status(self, user_id: int, is_blocked: bool):
+        data = {"is_blocked": is_blocked}
+        await self.repository.update(data, user_id)
+
 
 user_service = UserService(user_repository)

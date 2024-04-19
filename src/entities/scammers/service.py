@@ -60,7 +60,7 @@ class ScammerService:
     async def delete_scammer(self, scammer_id: int):
         return await self.repository.delete(scammer_id)
 
-    async def save(self, scammer: ScammerScheme, proof: ProofScheme, media: list):
+    async def save(self, scammer: ScammerScheme, proof: ProofScheme, media: list, decision: bool = False, moderator_id: int = None):
         try:
             scammer_from_db = await self.repository.create(scammer.model_dump())
         except IntegrityException as e:
@@ -68,6 +68,9 @@ class ScammerService:
             scammer_from_db = await self.repository.update(scammer.model_dump(), scammer.id)
 
         proof_data = proof.model_dump()
+        proof_data["decision"] = decision
+        if moderator_id:
+            proof_data["moderator_id"] = moderator_id
 
         del proof_data["id"]
 

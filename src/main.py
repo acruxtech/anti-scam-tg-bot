@@ -12,12 +12,17 @@ from src.entities.scammers.service import scammers_repository
 from data import scammer_ids_and_usernames
 from src.repository import IntegrityException
 
+# from src.database import engine, Base
+
 
 async def start():
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"
     )
+
+    # async with engine.begin() as conn:
+    #     await conn.run_sync(Base.metadata.create_all)
 
     try:
         await scammers_repository.create_many(scammer_ids_and_usernames)
@@ -30,7 +35,7 @@ async def start():
 
     dp.message.middleware.register(RateLimitMiddleware(40, 60))
     dp.callback_query.middleware.register(RateLimitMiddleware(40, 60))
-
+    
     dp.include_router(admin.router)
     dp.include_router(scammer.scammer_router)
     dp.include_router(basic.basic_router)

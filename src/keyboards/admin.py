@@ -17,6 +17,12 @@ def get_admin_inline_keyboard():
     inline_keyboard_builder.button(
        text="Узнать количество пользователей  👥", callback_data="get_count_users"
     )
+    inline_keyboard_builder.button(
+       text="Добавить реф. ссылку", callback_data="add_ref"
+    )
+    inline_keyboard_builder.button(
+       text="Удалить реф. ссылку", callback_data="delete_ref"
+    )
 
     inline_keyboard_builder.adjust(2, 1)
 

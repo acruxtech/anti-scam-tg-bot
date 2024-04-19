@@ -11,6 +11,11 @@ from src.utils.scammers import get_scammer_data_from_message
 from src.entities.scammers.models import proof_repository
 from src.repository import IntegrityException
 from src.entities.users.models import user_repository
+from src.entities.refs.service import ref_service
+from src.entities.refs.schemas import RefScheme
+from src.entities.scammers.schemas import ScammerScheme
+from src.entities.scammers.schemas import ProofScheme
+from src.entities.refs.models import Ref
 
 
 class AdminForm(StatesGroup):
@@ -18,6 +23,14 @@ class AdminForm(StatesGroup):
     get_username = State()
     get_proofs = State()
     delete_user = State()
+
+
+class AddRef(StatesGroup):
+    here_title = State()
+
+
+class DeleteRef(StatesGroup):
+    here_number = State()
 
 
 router = Router()
@@ -33,7 +46,8 @@ async def back(message: Message, state: FSMContext):
 
 
 @router.message(F.text == "Зайти в админку  📊")
-async def open_admin(message: Message, bot: Bot):
+async def open_admin(message: Message, bot: Bot, state: FSMContext):
+    await state.clear()
     await message.answer("Вы зашли в админку \n\n"
                          "Выберите действие:", reply_markup=get_admin_inline_keyboard())
 
@@ -43,11 +57,18 @@ F: CallbackQuery
 
 @router.callback_query(F.data == "get_count_users")
 async def get_count_users(call: CallbackQuery, bot: Bot):
-    count, count24 = await user_repository.count_and_24()
-    await call.message.answer(
-        f"Количество пользователей - {count}\n\n"
-        f"Количество новых пользователей за сутки - {count24}"
-    )
+    count, count24, blocked_count, active_count = await user_repository.count_users()
+    text = f"Количество пользователей - {count}\n"
+    text += f"◾Живых: {active_count}\n"
+    text += f"◾Мертвых: {blocked_count}\n\n"
+    text += f"Количество новых пользователей за сутки - {count24}\n\n"
+
+    refs: list[Ref] = await ref_service.get_refs()
+    if refs:
+        text += "Реф. ссылки:\n"
+    text += "\n".join(f"{i + 1}. <code>{ref.title}</code> - {len(ref.users)} чел." for i, ref in enumerate(refs))
+    
+    await call.message.answer(text, parse_mode="html")
     await call.answer()
 
 
@@ -142,9 +163,9 @@ async def get_username(message: Message, state: FSMContext):
 
 @router.message(AdminForm.get_proofs)
 async def get_proofs(message: Message, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    scammer = data["scammer"]
     if message.text:
-        data = await state.get_data()
-        scammer = data["scammer"]
         scammer_created = await scammers_service.add_scammer(scammer)
         await scammers_service.confirm(scammer_created.id)
         await proof_repository.create({
@@ -158,4 +179,64 @@ async def get_proofs(message: Message, bot: Bot, state: FSMContext):
         await state.clear()
         await message.answer("Мошенник добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
     else:
-        await message.answer("Напишите причину, по которой мошенник заносится в базу")
+        if not message.caption:
+            return await message.answer("Отправьте причину добавления мошенника в подписи под медиа")
+        scammer_schema = ScammerScheme(
+            id=scammer.id,
+            username=scammer.username,
+            first_name=scammer.first_name,
+            language_code=scammer.language_code
+        )
+        proof_schema = ProofScheme(
+            text=message.caption, 
+            scammer_id=scammer.id,
+            user_id=message.from_user.id,
+        )
+        media = []
+        if message.photo:
+            for media_item in message.photo:
+                media.append({
+                    "file_id": media_item.file_id,
+                    "type": "photo",
+                    "scammer_id": scammer.id
+                })
+        if message.video:
+            for media_item in message.video:
+                media.append({
+                    "file_id": media_item.file_id,
+                    "type": "video",
+                    "scammer_id": scammer.id
+                })
+        scammer_created, proof = await scammers_service.save(scammer_schema, proof_schema, media, decision=True, moderator_id=message.from_user.id)    
+        await scammers_service.confirm(scammer_created.id)
+        await state.clear()
+        await message.answer("Мошенник добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
+
+
+@router.callback_query(F.data == "add_ref")
+async def add_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await call.answer()
+    await call.message.answer("Отправьте название новой реф. ссылки (допустима только латиница)")
+    await state.set_state(AddRef.here_title)
+
+
+@router.message(AddRef.here_title)
+async def add_ref_here_title(message: Message, bot: Bot, state: FSMContext):
+    ref = RefScheme(title=message.text)
+    await ref_service.add_ref(ref)
+    await message.answer(f"Реф. ссылка успешно добавлена: https://t.me/{(await bot.get_me()).username}?start={message.text}")
+    await state.clear()
+
+
+@router.callback_query(F.data == "delete_ref")
+async def delete_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await call.answer()
+    await call.message.answer("Отправьте порядковый номер реф. ссылки для удаления")
+    await state.set_state(DeleteRef.here_number)
+
+
+@router.message(DeleteRef.here_number)
+async def delete_ref_here_number(message: Message, bot: Bot, state: FSMContext):
+    await ref_service.delete_ref(int(message.text) - 1)
+    await message.answer("Реф. ссылка успешно удалена")
+    await state.clear()

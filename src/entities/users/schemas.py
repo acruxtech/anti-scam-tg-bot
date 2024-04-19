@@ -8,3 +8,4 @@ class UserScheme(BaseModel):
     language_code: str | None = None
     is_premium: bool | None = None
     is_bot: bool | None = None
+    ref_id: int | None = None
