@@ -54,7 +54,7 @@ class AddScammerForm(StatesGroup):
     get_edited_text = State()
 
 
-@scammer_router.message(F.text == "Кинуть репорт  ✍")
+@scammer_router.message(F.text == "Добавить мошенника ✍️")
 async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
     await message.answer(
         "На кого вы кидаете репорт?\n\n", reply_markup=get_report_keyboard()

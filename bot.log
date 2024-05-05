@@ -1,8 +1,36 @@
-2024-04-26 11:19:55,231 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(527) - Start polling
-2024-04-26 11:19:55,284 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(341) - Run polling for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
-2024-04-26 11:19:55,616 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340679 is handled. Duration 264 ms by bot id=5782161283
-2024-04-26 11:20:02,630 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
-2024-04-26 11:20:02,631 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(359) - Polling stopped for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
-2024-04-26 11:20:02,631 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(554) - Polling stopped
-2024-04-26 11:20:02,822 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
-2024-04-26 11:20:03,007 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
+2024-05-05 17:28:40,920 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(527) - Start polling
+2024-05-05 17:28:40,977 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(341) - Run polling for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
+2024-05-05 17:28:42,928 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(1425820937) already exists.
+[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
+[parameters: (1425820937, 'acruxtech', 'Vladimir', 'en', True, False, False, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2024-05-05 17:28:42,937 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340852 is handled. Duration 509 ms by bot id=5782161283
+2024-05-05 17:28:43,889 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340853 is handled. Duration 89 ms by bot id=5782161283
+2024-05-05 17:28:46,945 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340854 is handled. Duration 187 ms by bot id=5782161283
+2024-05-05 17:28:47,857 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340855 is handled. Duration 214 ms by bot id=5782161283
+2024-05-05 17:28:49,612 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(1425820937) already exists.
+[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
+[parameters: (1425820937, 'acruxtech', 'Vladimir', 'en', True, False, False, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2024-05-05 17:28:49,618 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340856 is handled. Duration 401 ms by bot id=5782161283
+2024-05-05 17:28:51,281 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340857 is handled. Duration 197 ms by bot id=5782161283
+2024-05-05 17:28:52,085 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340858 is handled. Duration 194 ms by bot id=5782161283
+2024-05-05 17:28:53,404 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(1425820937) already exists.
+[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
+[parameters: (1425820937, 'acruxtech', 'Vladimir', 'en', True, False, False, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2024-05-05 17:28:53,411 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340859 is handled. Duration 430 ms by bot id=5782161283
+2024-05-05 17:28:54,262 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340860 is handled. Duration 91 ms by bot id=5782161283
+2024-05-05 17:28:56,228 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340861 is handled. Duration 208 ms by bot id=5782161283
+2024-05-05 17:29:03,033 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(1425820937) already exists.
+[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
+[parameters: (1425820937, 'acruxtech', 'Vladimir', 'en', True, False, False, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2024-05-05 17:29:03,037 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340862 is handled. Duration 394 ms by bot id=5782161283
+2024-05-05 17:29:04,795 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
+2024-05-05 17:29:04,796 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(359) - Polling stopped for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
+2024-05-05 17:29:04,796 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(554) - Polling stopped

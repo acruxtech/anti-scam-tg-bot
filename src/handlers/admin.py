@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from src.entities.scammers.service import scammers_service
 from src.utils.excel import create_list_scammer
-from src.keyboards.admin import get_admin_inline_keyboard, get_apply_photos_inline_keyboard
+from src.keyboards.admin import get_admin_inline_keyboard, get_apply_photos_inline_keyboard, get_back_inline_keyboard
 from src.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard
 from src.utils.scammers import get_scammer_data_from_message
 from src.entities.scammers.models import proof_repository
@@ -55,6 +55,14 @@ async def open_admin(message: Message, bot: Bot, state: FSMContext):
 
 
 F: CallbackQuery
+
+
+@router.callback_query(F.data == "admin")
+async def open_admin(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await state.clear()
+    await call.message.answer("Вы зашли в админку \n\n"
+                         "Выберите действие:", reply_markup=get_admin_inline_keyboard())
+    await call.answer()
 
 
 @router.callback_query(F.data == "get_count_users")
@@ -166,7 +174,6 @@ async def get_username(message: Message, state: FSMContext):
 
 @router.message(AdminForm.get_proofs)
 async def get_proofs(message: Message, bot: Bot, state: FSMContext):
-    print("vhrefcjds")
     data = await state.get_data()
     await state.set_state(AdminForm.apply_proofs)
 
@@ -190,19 +197,6 @@ async def apply_proofs(call: CallbackQuery, bot: Bot, state: FSMContext):
 async def get_reason(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
     scammer = data["scammer"]
-    # if message.text:
-    #     scammer_created = await scammers_service.add_scammer(scammer)
-    #     await scammers_service.confirm(scammer_created.id)
-    #     await proof_repository.create({
-    #         "scammer_id": scammer.id,
-    #         "text": message.text,
-    #         "user_id": message.from_user.id,
-    #         "decision": True,
-    #         "moderator_id": message.from_user.id
-    #     })
-    #     await scammers_service.confirm(scammer_created.id)
-    #     await state.clear()
-    #     await message.answer("Мошенник добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
     
     scammer_schema = ScammerScheme(
         id=scammer.id,
@@ -241,7 +235,10 @@ async def get_reason(message: Message, bot: Bot, state: FSMContext):
 @router.callback_query(F.data == "add_ref")
 async def add_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.answer()
-    await call.message.answer("Отправьте название новой реф. ссылки (допустима только латиница)")
+    await call.message.answer(
+        "Отправьте название новой реф. ссылки (допустима только латиница)",
+        reply_markup=get_back_inline_keyboard(),
+    )
     await state.set_state(AddRef.here_title)
 
 
@@ -256,7 +253,10 @@ async def add_ref_here_title(message: Message, bot: Bot, state: FSMContext):
 @router.callback_query(F.data == "delete_ref")
 async def delete_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.answer()
-    await call.message.answer("Отправьте порядковый номер реф. ссылки для удаления")
+    await call.message.answer(
+        "Отправьте порядковый номер реф. ссылки для удаления",
+        reply_markup=get_back_inline_keyboard(),
+    )
     await state.set_state(DeleteRef.here_number)
 
 

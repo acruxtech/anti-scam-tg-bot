@@ -48,3 +48,13 @@ def get_apply_photos_inline_keyboard():
     )
 
     return inline_keyboard_builder.as_markup()
+
+
+def get_back_inline_keyboard():
+    inline_keyboard_builder = InlineKeyboardBuilder()
+
+    inline_keyboard_builder.button(
+        text="Назад", callback_data="admin"
+    )
+
+    return inline_keyboard_builder.as_markup()

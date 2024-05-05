@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 from src.messages import get_start_message
-from src.keyboards.basic import get_main_menu_keyboard
+from src.keyboards.basic import get_main_menu_keyboard, get_check_keyboard
 from src.entities.users.schemas import UserScheme
 from src.entities.users.service import user_service
 from src.entities.scammers.service import scammers_service
@@ -22,7 +22,9 @@ F: Message
 
 
 @basic_router.message(Command("start"))
-async def start(message: Message, command: CommandObject, bot: Bot):
+async def start(message: Message, command: CommandObject, bot: Bot, state: FSMContext):
+    await state.clear()
+
     photo_path = r"./media/systems/menu.png"
     await message.answer_photo(
         FSInputFile(photo_path),
@@ -41,6 +43,16 @@ async def start(message: Message, command: CommandObject, bot: Bot):
         user.ref_id = ref.id
 
     await user_service.add_user(user)
+
+
+@basic_router.message(F.text == "Проверить пользователя 🔍")
+async def check(message: Message, bot: Bot, state: FSMContext):
+    await state.clear()
+
+    await message.answer(
+        "Уточните, каким способом искать мошенника в базе",
+        reply_markup=get_check_keyboard(),
+    )
 
 
 @basic_router.message(Command("add_to_channel"))

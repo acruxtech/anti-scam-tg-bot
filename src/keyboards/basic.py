@@ -10,27 +10,38 @@ from src.utils.callbacks import AddScamer
 def get_main_menu_keyboard(user_id: int):
     keyboard_builder = ReplyKeyboardBuilder()
 
-    request_button = KeyboardButton(
-        text="Проверить профиль  🔍", request_user=KeyboardButtonRequestUser(request_id=1)
-    )
-
-    keyboard_builder.add(request_button)
-    keyboard_builder.button(text="Проверить по ID")
-    keyboard_builder.button(text="Проверить по Username")
+    keyboard_builder.button(text="Проверить пользователя 🔍")
 
     request_button = KeyboardButton(
         text="Проверить канал  📢", request_chat=KeyboardButtonRequestChat(request_id=6, chat_is_channel=True)
     )
 
     keyboard_builder.add(request_button)
-    keyboard_builder.button(text="Кинуть репорт  ✍")
+    keyboard_builder.button(text="Добавить мошенника ✍️")
     keyboard_builder.button(text="Связаться с нами  📞")
 
     if user_id in OWNER_IDS:
         keyboard_builder.button(text="Зайти в админку  📊")
-        keyboard_builder.adjust(1, 2, 1, 2)
+        keyboard_builder.adjust(1, 1, 2)
     else:
-        keyboard_builder.adjust(1, 2, 1, 2)
+        keyboard_builder.adjust(1, 1, 2, 1)
+
+    return keyboard_builder.as_markup(
+        resize_keyboard=True, one_time_keyboard=False, input_field_placeholder="Выбери действие..."
+    )
+
+
+def get_check_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+
+    request_button = KeyboardButton(
+        text="Отправить профиль 🔍", request_user=KeyboardButtonRequestUser(request_id=1)
+    )
+
+    keyboard_builder.add(request_button)
+    keyboard_builder.button(text="Проверить по ID")
+    keyboard_builder.button(text="Проверить по Username")
+    keyboard_builder.adjust(1, 2)
 
     return keyboard_builder.as_markup(
         resize_keyboard=True, one_time_keyboard=False, input_field_placeholder="Выбери действие..."
