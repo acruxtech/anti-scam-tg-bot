@@ -9,3 +9,4 @@ class UserScheme(BaseModel):
     is_premium: bool | None = None
     is_bot: bool | None = None
     ref_id: int | None = None
+    is_blocked: bool = False

@@ -1,3 +1,4 @@
+import logging
 from aiogram import Bot, Router, F
 from aiogram.types import Message, FSInputFile, ChatMemberUpdated
 from aiogram.filters import Command, CommandObject
@@ -15,16 +16,9 @@ from src.utils.media import create_media
 from src.utils.scammers import create_message_about_scammer
 
 basic_router = Router()
+logger = logging.getLogger(__name__)
 
 F: Message
-
-
-@basic_router.my_chat_member()
-async def my_chat_member_handler(update: ChatMemberUpdated):
-    if update.new_chat_member.status == 'kicked':
-        await user_service.update_user_status(update.chat.id, True)
-    if update.old_chat_member.status == "kicked":
-        await user_service.update_user_status(update.chat.id, False)
 
 
 @basic_router.message(Command("start"))
@@ -42,6 +36,7 @@ async def start(message: Message, command: CommandObject, bot: Bot):
     if ref_title:
         ref = await ref_service.get_ref_by_title(ref_title)
         if not ref:
+            await user_service.add_user(user)
             return
         user.ref_id = ref.id
 
@@ -50,6 +45,9 @@ async def start(message: Message, command: CommandObject, bot: Bot):
 
 @basic_router.message(Command("add_to_channel"))
 async def start(message: Message, bot: Bot):
+    user = UserScheme(**message.from_user.model_dump())
+    await user_service.add_user(user)
+
     photo_path = r"./media/systems/admin.PNG"
     await message.answer_photo(
         FSInputFile(photo_path),

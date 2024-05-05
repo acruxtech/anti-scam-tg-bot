@@ -2,7 +2,8 @@ import logging
 import random
 
 from aiogram import Bot, Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, User
+from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
@@ -22,6 +23,8 @@ from src.keyboards.basic import (
 )
 from src.keyboards.menu import get_report_message
 from src.keyboards.admin import get_text_edit_keyboard
+
+from src.utils.callbacks import AddScamer
 
 from src.messages import get_about_scammer_message
 
@@ -77,9 +80,10 @@ async def send_scam_user(message: Message, bot: Bot, state: FSMContext):
     await state.set_state(AddScammerForm.get_profile)
 
 
-@scammer_router.message(F.text == "Назад")
-async def back(message: Message, bot: Bot, state: FSMContext):
-    await message.answer("Возвращаю в главное меню...", reply_markup=get_main_menu_keyboard(message.from_user.id))
+@scammer_router.callback_query(AddScamer.filter(F.action == "menu"))
+async def back(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await call.answer()
+    await call.message.answer("Возвращаю в главное меню...", reply_markup=get_main_menu_keyboard(call.from_user.id))
     await state.clear()
 
 
@@ -149,8 +153,9 @@ async def get_username(message: Message, bot: Bot, state: FSMContext):
         await message.answer("Пожалуйста, отправьте корректный username")
 
 
-@scammer_router.message(F.text == "Отправить репорт 🚩")
-async def send_report(message: Message, bot: Bot, state: FSMContext):
+@scammer_router.callback_query(AddScamer.filter(F.action == "send_report"))
+async def send_report(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await call.answer()
     data = await state.get_data()
 
     scammer = data.get("scammer")
@@ -165,24 +170,25 @@ async def send_report(message: Message, bot: Bot, state: FSMContext):
     if media:
         scammer_from_db, proof_from_db = await scammers_service.save(scammer, proof, media)
         await state.clear()
-        await send_post_to_moderator_chat(message, bot, scammer_from_db, proof_from_db)
-        await message.answer(
+        await send_post_to_moderator_chat(call.from_user, bot, scammer_from_db, proof_from_db)
+        await call.message.answer(
             "<b>Спасибо за обращение!</b>\n\n"
             "Ваша заявка на рассмотрении у модераторов, ожидайте…",
-            reply_markup=get_main_menu_keyboard(message.from_user.id)
+            reply_markup=get_main_menu_keyboard(call.from_user.id)
         )
     else:
-        await message.answer("Загрузите хотя бы 1 фотографию или видео")
+        await call.message.answer("Загрузите хотя бы 1 фотографию или видео")
 
 
-@scammer_router.message(F.text == "Сбросить фото 📸")
-async def delete_media(message: Message, bot: Bot, state: FSMContext):
+@scammer_router.callback_query(AddScamer.filter(F.action == "reset"))
+async def delete_media(call: CallbackQuery, bot: Bot, state: FSMContext):
     await state.update_data(media=None)
-    await message.answer("Пруфы сброшены, можете загрузить новые", reply_markup=get_send_media_scammer_keyboard())
+    await call.answer()
+    await call.message.answer("Пруфы сброшены, можете загрузить новые", reply_markup=get_send_media_scammer_keyboard())
 
 
 async def send_post_to_moderator_chat(
-    message: Message,
+    user: User,
     bot: Bot,
     scammer_from_db: ScammerScheme,
     proof_from_db: ProofScheme
@@ -207,7 +213,7 @@ async def send_post_to_moderator_chat(
 
     await bot.send_message(
         MODERATOR_ID,
-        f"Репорт от <b>@{message.from_user.username}</b> \n\n"
+        f"Репорт от <b>@{user.username}</b> \n\n"
         f"На пользователя: \n\n"
         f"{about_scammer}  🛑"
     )
@@ -216,7 +222,7 @@ async def send_post_to_moderator_chat(
 
     await bot.send_message(
         MODERATOR_ID, "Выберите действие:",
-        reply_markup=get_report_message(message.from_user.id, proof_from_db.id, scammer_from_db.id)
+        reply_markup=get_report_message(user.id, proof_from_db.id, scammer_from_db.id)
     )
 
 
@@ -343,10 +349,6 @@ async def get_photo(message: Message, bot: Bot, state: FSMContext):
 
     await state.update_data(media=media)
 
-    # await message.edit_reply_markup(
-    #     reply_markup=get_send_media_scammer_keyboard()
-    # )
-    
 
 @scammer_router.message(AddScammerForm.get_proofs, F.text)
 async def ask_proofs(message: Message, bot: Bot, state: FSMContext):

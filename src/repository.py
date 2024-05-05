@@ -1,9 +1,14 @@
+import logging
+
 from abc import ABC, abstractmethod
 
 from sqlalchemy import insert, select, update, delete, text
 from sqlalchemy.exc import IntegrityError
 
 from src.database import async_session_maker, Base
+
+
+logger = logging.getLogger(__name__)
 
 
 class RepositoryInterface(ABC):
@@ -55,6 +60,7 @@ class SQLAlchemyRepository(RepositoryInterface):
             try:
                 result = await session.execute(stmt)
             except IntegrityError as e:
+                logger.error(e)
                 raise IntegrityException
             else:
                 await session.commit()

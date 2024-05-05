@@ -37,3 +37,14 @@ def get_text_edit_keyboard():
     return kb.as_markup(
         resize_keyboard=True, one_time_keyboard=True, input_field_placeholder="Напишите отредактированный текст..."
     )
+
+
+
+def get_apply_photos_inline_keyboard():
+    inline_keyboard_builder = InlineKeyboardBuilder()
+
+    inline_keyboard_builder.button(
+        text="Далее", callback_data="apply_photos"
+    )
+
+    return inline_keyboard_builder.as_markup()

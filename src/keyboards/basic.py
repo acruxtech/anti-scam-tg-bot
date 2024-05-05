@@ -1,8 +1,10 @@
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from aiogram.types import KeyboardButtonRequestUser, KeyboardButton, KeyboardButtonRequestChat
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+from aiogram.types import KeyboardButtonRequestUser, KeyboardButton, KeyboardButtonRequestChat, InlineKeyboardButton
 from aiogram.types.reply_keyboard_remove import ReplyKeyboardRemove
 
 from src.config import OWNER_IDS
+
+from src.utils.callbacks import AddScamer
 
 
 def get_main_menu_keyboard(user_id: int):
@@ -86,17 +88,15 @@ def get_send_user_keyboard():
 
 
 def get_send_media_scammer_keyboard():
-    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder = InlineKeyboardBuilder()
 
-    keyboard_builder.button(text="Отправить репорт 🚩")
-    keyboard_builder.button(text="Сбросить фото 📸")
-    keyboard_builder.button(text="Назад")
+    keyboard_builder.button(text="Отправить репорт 🚩", callback_data=AddScamer(action="send_report").pack())
+    keyboard_builder.button(text="Сбросить фото 📸", callback_data=AddScamer(action="reset").pack())
+    keyboard_builder.button(text="Назад", callback_data=AddScamer(action="menu").pack())
 
     keyboard_builder.adjust(1)
 
-    return keyboard_builder.as_markup(
-        resize_keyboard=True, one_time_keyboard=False, input_field_placeholder="Что делаем с репортом?"
-    )
+    return keyboard_builder.as_markup()
 
 
 def get_contact_cancel_keyboard():

@@ -1,3 +1,4 @@
+import os
 import logging
 import asyncio
 
@@ -12,17 +13,25 @@ from src.entities.scammers.service import scammers_repository
 from data import scammer_ids_and_usernames
 from src.repository import IntegrityException
 
-# from src.database import engine, Base
+from src.database import engine, Base
 
 
 async def start():
+    if(os.path.isfile('bot.log')):
+        os.remove('bot.log')
+
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"
+        format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s",
+        encoding="UTF-8",
+        handlers=[
+            logging.FileHandler("bot.log"),
+            logging.StreamHandler()
+        ]
     )
 
-    # async with engine.begin() as conn:
-    #     await conn.run_sync(Base.metadata.create_all)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     try:
         await scammers_repository.create_many(scammer_ids_and_usernames)
@@ -47,7 +56,7 @@ async def start():
     dp.shutdown.register(get_stop)
 
     try:
-        await dp.start_polling(bot)
+        await dp.start_polling(bot, allowed_updates=["message", "callback_query", "my_chat_member", "inline_query", "chosen_inline_result"])
     finally:
         await bot.session.close()
 

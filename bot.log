@@ -1,0 +1,8 @@
+2024-04-26 11:19:55,231 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(527) - Start polling
+2024-04-26 11:19:55,284 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(341) - Run polling for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
+2024-04-26 11:19:55,616 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340679 is handled. Duration 264 ms by bot id=5782161283
+2024-04-26 11:20:02,630 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
+2024-04-26 11:20:02,631 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(359) - Polling stopped for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
+2024-04-26 11:20:02,631 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(554) - Polling stopped
+2024-04-26 11:20:02,822 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
+2024-04-26 11:20:03,007 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal

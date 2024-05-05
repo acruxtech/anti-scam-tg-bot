@@ -24,19 +24,26 @@ async def create_message_about_scammer(scammer):
 
     print("scammer -", scammer.is_scam)
 
-    info_about_scammer = f"<b>Информация о пользователе:</b>\n\n"
-
+    info_about_scammer = ""
     if scammer:
+        is_channel = "-100" in str(scammer.id)
+
         proof = await proof_repository.get_by_scammer_id(scammer.id)
         print("proof -", proof)
 
+        info_about_scammer = f"<b>Информация о {'канале' if is_channel else 'пользователе'}:</b>\n\n"
         info_about_scammer += f"ID = <code>{scammer.id}</code>\n"
-        info_about_scammer += f"Для открытия профиля мошенника воспользуйтесь одной из ссылок (могут не работать из-за ограничений телеграма)\n"
-        info_about_scammer += f"tg://user?id={scammer.id}\n"
-        info_about_scammer += f"https://t.me/@id{scammer.id}\n"
-        info_about_scammer += f"tg://openmessage?user_id={scammer.id}\n"
 
-        scammer_message = "Этот пользователь - мошенник!   ❌"
+        if not is_channel:
+            info_about_scammer += f"Для открытия профиля мошенника воспользуйтесь одной из ссылок (могут не работать из-за ограничений телеграма)\n"
+            info_about_scammer += f"tg://user?id={scammer.id}\n"
+            info_about_scammer += f"https://t.me/@id{scammer.id}\n"
+            info_about_scammer += f"tg://openmessage?user_id={scammer.id}\n"
+
+        if is_channel:
+            scammer_message = "Этот канал - мошеннический!   ❌"
+        else:
+            scammer_message = "Этот пользователь - мошенник!   ❌"
         if scammer.username:
             info_about_scammer += f"\n\nUsername = @{scammer.username}"
 

@@ -36,9 +36,14 @@ async def back(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(ContactState.get_contact_text, F.text)
 async def get_text_contact(message: Message, bot: Bot, state: FSMContext):
+    links = [
+        f"tg://user?id={message.from_user.id}", 
+        f"https://t.me/@id{message.from_user.id}", 
+        f"tg://openmessage?user_id={message.from_user.id}",
+    ]
     await bot.send_message(
         TECH_SUPPORT_ID,
-        text=f"Пришло сообщение от <b>@{message.from_user.username}</b>:"
+        text=f"Пришло сообщение от <b>@{message.from_user.username}</b>\n\n<b>Ссылки на профиль:</b>\n" + "\n".join(links)
     )
     contact_message = await contact_message_service.create_contact_message(message.from_user.id, message.text)
     await bot.send_message(

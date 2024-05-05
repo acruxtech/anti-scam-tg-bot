@@ -5,7 +5,7 @@ from aiogram.utils.media_group import MediaGroupBuilder
 from src.entities.scammers.models import media_repository, ScammerMedia
 
 
-DEFAULT_TEXT_SUFFIX_PROOF = "\n\nРекомендую проверять пользователей через @AntiSkamTG_bot"
+DEFAULT_TEXT_SUFFIX_PROOF = "\n\nРекомендую проверять пользователей/каналы через @AntiSkamTG_bot"
 
 
 async def create_media(scammer, proof, message: Message, bot: Bot, msg: str):
