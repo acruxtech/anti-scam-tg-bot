@@ -5,11 +5,9 @@ def get_start_message(message: Message) -> str:
     start_message = f"""
 <b>AntiSkamTG – <i>Не дай себя обмануть.</i></b> 
 
-<b>Проверяй</b> пользователя/канал на честность <b>с помощью нашего бота.</b>
+<b>Добавляй</b> скам-пользователя/канал в <b>нашего бота.</b>
 
-<b>Узнавай больше про ТГ:</b> <a href="https://t.me/+qyKIFJSJ0DwzZmUy">Жилка Предпринимателя</a> / <a href="https://t.me/+PXCfc4FyhMVjMzQ6">Rakhimov ВЕЩАЕТ</a>
-
-<b>Агентство</b> – <a href="https://t.me/spaceagency1">Space Agency</a>
+<b>Узнавай больше про TG:</b> <a href="https://t.me/prosto_telegram1">PROSTO TELEGRAM</a>
 
 <b>Наш чат</b> – <a href="https://t.me/+Ech10tlczSs1ZmFi">Комитет Админов</a>
 

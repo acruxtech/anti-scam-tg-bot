@@ -46,20 +46,18 @@ async def check_new_member(event: ChatMemberUpdated, bot: Bot):
 
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER))
 async def bot_deleted(event: ChatMemberUpdated, bot: Bot):
-    await bot.send_message(
-        event.from_user.id,
-        f"Вы удалили меня из группы <b>{event.chat.title}</b>!"
-        f"Теперь ваш канал находится под угрозой!"
-    )
-    await chat_service.delete_chat(event.chat.id)
-
-
-@router.my_chat_member()
-async def my_chat_member_handler(update: ChatMemberUpdated):
-    if update.new_chat_member.status == 'kicked':
-        await user_service.update_user_status(update.chat.id, True)
-    if update.old_chat_member.status == "kicked":
-        await user_service.update_user_status(update.chat.id, False)
+    if event.chat.type == "private":
+        if event.new_chat_member.status == 'kicked':
+            await user_service.update_user_status(event.chat.id, True)
+        if event.old_chat_member.status == "kicked":
+            await user_service.update_user_status(event.chat.id, False)
+    else:
+        await bot.send_message(
+            event.from_user.id,
+            f"Вы удалили меня из группы <b>{event.chat.title}</b>!"
+            f"Теперь ваш канал находится под угрозой!"
+        )
+        await chat_service.delete_chat(event.chat.id)
 
 
 @router.inline_query()

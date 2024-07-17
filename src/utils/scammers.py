@@ -36,19 +36,26 @@ async def create_message_about_scammer(scammer):
 
         if not is_channel:
             info_about_scammer += f"Для открытия профиля мошенника воспользуйтесь одной из ссылок (могут не работать из-за ограничений телеграма)\n"
+            info_about_scammer += f"<a href='https://t.me/@id{scammer.id}'>Вечная ссылка 1</a>\n"
+            info_about_scammer += f"<a href='tg://openmessage?user_id={scammer.id}'>Вечная ссылка 2</a>\n"
             info_about_scammer += f"tg://user?id={scammer.id}\n"
-            info_about_scammer += f"https://t.me/@id{scammer.id}\n"
-            info_about_scammer += f"tg://openmessage?user_id={scammer.id}\n"
+
+        print(info_about_scammer)
 
         if is_channel:
             scammer_message = "Этот канал - мошеннический!   ❌"
-        else:
+        else:       
             scammer_message = "Этот пользователь - мошенник!   ❌"
         if scammer.username:
             info_about_scammer += f"\n\nUsername = @{scammer.username}"
 
         if scammer.first_name:
             info_about_scammer += f"\n\nFirst Name = <code>{scammer.first_name}</code>"
+
+        # исключения!!!
+        if scammer.id == 612761675:
+            scammer_message = scammer_message.replace("мошенник!", "очернитель!", 1)
+            info_about_scammer = info_about_scammer.replace("профиля мошенника", "профиля очернителя", 1)
     else:
         scammer_message = "Данный пользователь не был найден в базе, но будьте осторожны"
 

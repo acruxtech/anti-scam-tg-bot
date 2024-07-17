@@ -50,7 +50,9 @@ async def check(message: Message, bot: Bot, state: FSMContext):
     await state.clear()
 
     await message.answer(
-        "Уточните, каким способом искать мошенника в базе",
+        "Уточните, каким способом искать мошенника в базе\n\n"
+        "Рекомендуем проверять пользователей через ID\n\n" 
+        "Бот для проверки ID - @username_to_id_bot",
         reply_markup=get_check_keyboard(),
     )
 

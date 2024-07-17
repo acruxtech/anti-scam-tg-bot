@@ -1,36 +1,170 @@
-2024-05-05 17:28:40,920 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(527) - Start polling
-2024-05-05 17:28:40,977 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(341) - Run polling for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
-2024-05-05 17:28:42,928 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
+2024-05-13 23:05:02,199 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(527) - Start polling
+2024-05-13 23:05:02,255 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(341) - Run polling for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
+2024-05-13 23:05:04,069 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(6293780134) already exists.
+[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
+[parameters: (6293780134, 'member5413', 'Корнеева', 'en', None, False, False, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2024-05-13 23:05:04,076 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341415 is handled. Duration 508 ms by bot id=5782161283
+2024-05-13 23:05:21,085 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341416 is handled. Duration 4 ms by bot id=5782161283
+2024-05-13 23:05:57,808 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341417 is handled. Duration 269 ms by bot id=5782161283
+2024-05-13 23:06:14,369 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341418 is not handled. Duration 0 ms by bot id=5782161283
+2024-05-13 23:06:15,131 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(6293780134) already exists.
+[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
+[parameters: (6293780134, 'member5413', 'Корнеева', 'en', None, False, False, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2024-05-13 23:06:15,135 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341419 is handled. Duration 525 ms by bot id=5782161283
+2024-05-13 23:06:22,773 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341420 is handled. Duration 225 ms by bot id=5782161283
+2024-05-13 23:07:02,927 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341421 is not handled. Duration 165 ms by bot id=5782161283
+2024-05-13 23:07:02,927 - [ERROR] - aiogram.event - (dispatcher.py)._process_update(315) - Cause exception while process update id=427341421 by bot id=5782161283
+TelegramForbiddenError: Telegram server says - Forbidden: bot was kicked from the channel chat
+Traceback (most recent call last):
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 27, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/fsm/middleware.py", line 41, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 128, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 123, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 156, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 128, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 123, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 148, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/src/handlers/chat.py", line 20, in bot_added_as_admin
+    await bot.send_message(
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/bot.py", line 2823, in send_message
+    return await self(call, request_timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/bot.py", line 492, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/session/base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 178, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/session/base.py", line 128, in check_response
+    raise TelegramForbiddenError(method=method, message=description)
+aiogram.exceptions.TelegramForbiddenError: Telegram server says - Forbidden: bot was kicked from the channel chat
+2024-05-13 23:07:55,814 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
 DETAIL:  Key (id)=(1425820937) already exists.
 [SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
 [parameters: (1425820937, 'acruxtech', 'Vladimir', 'en', True, False, False, None)]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
-2024-05-05 17:28:42,937 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340852 is handled. Duration 509 ms by bot id=5782161283
-2024-05-05 17:28:43,889 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340853 is handled. Duration 89 ms by bot id=5782161283
-2024-05-05 17:28:46,945 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340854 is handled. Duration 187 ms by bot id=5782161283
-2024-05-05 17:28:47,857 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340855 is handled. Duration 214 ms by bot id=5782161283
-2024-05-05 17:28:49,612 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
-DETAIL:  Key (id)=(1425820937) already exists.
-[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
-[parameters: (1425820937, 'acruxtech', 'Vladimir', 'en', True, False, False, None)]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
-2024-05-05 17:28:49,618 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340856 is handled. Duration 401 ms by bot id=5782161283
-2024-05-05 17:28:51,281 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340857 is handled. Duration 197 ms by bot id=5782161283
-2024-05-05 17:28:52,085 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340858 is handled. Duration 194 ms by bot id=5782161283
-2024-05-05 17:28:53,404 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
-DETAIL:  Key (id)=(1425820937) already exists.
-[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
-[parameters: (1425820937, 'acruxtech', 'Vladimir', 'en', True, False, False, None)]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
-2024-05-05 17:28:53,411 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340859 is handled. Duration 430 ms by bot id=5782161283
-2024-05-05 17:28:54,262 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340860 is handled. Duration 91 ms by bot id=5782161283
-2024-05-05 17:28:56,228 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340861 is handled. Duration 208 ms by bot id=5782161283
-2024-05-05 17:29:03,033 - [ERROR] - src.repository - (repository.py).create(63) - (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
-DETAIL:  Key (id)=(1425820937) already exists.
-[SQL: INSERT INTO users (id, username, first_name, language_code, is_premium, is_bot, is_blocked, ref_id) VALUES ($1::BIGINT, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BOOLEAN, $6::BOOLEAN, $7::BOOLEAN, $8::BIGINT) RETURNING users.id, users.username, users.first_name, users.language_code, users.is_premium, users.is_bot, users.is_blocked, users.ref_id, users.datetime_first, users.datetime_last]
-[parameters: (1425820937, 'acruxtech', 'Vladimir', 'en', True, False, False, None)]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
-2024-05-05 17:29:03,037 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427340862 is handled. Duration 394 ms by bot id=5782161283
-2024-05-05 17:29:04,795 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
-2024-05-05 17:29:04,796 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(359) - Polling stopped for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
-2024-05-05 17:29:04,796 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(554) - Polling stopped
+2024-05-13 23:07:55,818 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341422 is handled. Duration 465 ms by bot id=5782161283
+2024-05-13 23:08:01,497 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341423 is handled. Duration 83 ms by bot id=5782161283
+2024-05-13 23:08:22,929 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341424 is not handled. Duration 169 ms by bot id=5782161283
+2024-05-13 23:08:22,929 - [ERROR] - aiogram.event - (dispatcher.py)._process_update(315) - Cause exception while process update id=427341424 by bot id=5782161283
+TelegramForbiddenError: Telegram server says - Forbidden: bot was kicked from the channel chat
+Traceback (most recent call last):
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 27, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/fsm/middleware.py", line 41, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 128, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 123, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 156, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 128, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 123, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/router.py", line 148, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/src/handlers/chat.py", line 20, in bot_added_as_admin
+    await bot.send_message(
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/bot.py", line 2823, in send_message
+    return await self(call, request_timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/bot.py", line 492, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/session/base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 178, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/home/acruxtech/Documents/!1_work/!_other/anti-scam-tg-bot/venv/lib64/python3.12/site-packages/aiogram/client/session/base.py", line 128, in check_response
+    raise TelegramForbiddenError(method=method, message=description)
+aiogram.exceptions.TelegramForbiddenError: Telegram server says - Forbidden: bot was kicked from the channel chat
+2024-05-13 23:08:58,728 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341425 is handled. Duration 185 ms by bot id=5782161283
+2024-05-13 23:10:10,096 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427341426 is handled. Duration 345 ms by bot id=5782161283
+2024-05-13 23:12:27,272 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
+2024-05-13 23:12:27,273 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(359) - Polling stopped for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
+2024-05-13 23:12:27,273 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(554) - Polling stopped
+2024-05-13 23:12:27,495 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
+2024-05-13 23:12:27,672 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal

@@ -1,4 +1,5 @@
 from aiogram import Bot, Router, F
+from aiogram.filters import Filter, and_f
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -16,6 +17,7 @@ from src.entities.refs.schemas import RefScheme
 from src.entities.scammers.schemas import ScammerScheme
 from src.entities.scammers.schemas import ProofScheme
 from src.entities.refs.models import Ref
+from src.config import OWNER_IDS
 
 
 class AdminForm(StatesGroup):
@@ -41,23 +43,32 @@ router = Router()
 F: Message
 
 
+class IsAdmin(Filter):
+    def __init__(self) -> None:
+        pass 
+
+    async def __call__(self, message: Message) -> bool:
+        return message.from_user.id in OWNER_IDS
+
+
+
 @router.message(F.text == "Назад")
 async def back(message: Message, state: FSMContext):
     await message.answer("Возвращаю в главное меню...", reply_markup=get_main_menu_keyboard(message.from_user.id))
     await state.clear()
 
 
-@router.message(F.text == "Зайти в админку  📊")
+@router.message(and_f(F.text == "Зайти в админку  📊", IsAdmin()))
 async def open_admin(message: Message, bot: Bot, state: FSMContext):
     await state.clear()
-    await message.answer("Вы зашли в админку \n\n"
+    await message.answer("Вы зашли в админку \n\n"  
                          "Выберите действие:", reply_markup=get_admin_inline_keyboard())
 
 
 F: CallbackQuery
 
 
-@router.callback_query(F.data == "admin")
+@router.callback_query(and_f(F.data == "admin", IsAdmin()))
 async def open_admin(call: CallbackQuery, bot: Bot, state: FSMContext):
     await state.clear()
     await call.message.answer("Вы зашли в админку \n\n"
@@ -65,7 +76,7 @@ async def open_admin(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.answer()
 
 
-@router.callback_query(F.data == "get_count_users")
+@router.callback_query(and_f(F.data == "get_count_users", IsAdmin()))
 async def get_count_users(call: CallbackQuery, bot: Bot):
     count, count24, blocked_count, active_count = await user_repository.count_users()
     text = f"Количество пользователей - {count}\n"
@@ -82,7 +93,7 @@ async def get_count_users(call: CallbackQuery, bot: Bot):
     await call.answer()
 
 
-@router.callback_query(F.data == "get_scammer_list")
+@router.callback_query(and_f(F.data == "get_scammer_list", IsAdmin()))
 async def get_list_scammer(call: CallbackQuery, bot: Bot):
     await call.message.answer("Отправляю весь список мошенников...")
     filename = await create_list_scammer()
@@ -91,7 +102,7 @@ async def get_list_scammer(call: CallbackQuery, bot: Bot):
     await call.answer("Список отправлен")
 
 
-@router.callback_query(F.data == "add_scammer")
+@router.callback_query(and_f(F.data == "add_scammer", IsAdmin()))
 async def start_add_scammer(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.message.answer(
         "Перешлите сообщение мошенника или отправьте его кнопкой ниже 👇👇👇", reply_markup=get_send_user_keyboard()
@@ -100,7 +111,7 @@ async def start_add_scammer(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.answer()
 
 
-@router.callback_query(F.data == "delete_scammer")
+@router.callback_query(and_f(F.data == "delete_scammer", IsAdmin()))
 async def start_delete_scammer(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.message.answer(
         "Отправьте ID мошенника (или перешлите сообщение, или отправьте контакт 👇👇👇",
@@ -112,7 +123,7 @@ async def start_delete_scammer(call: CallbackQuery, bot: Bot, state: FSMContext)
 F: Message
 
 
-@router.message(AdminForm.delete_user)
+@router.message(and_f(AdminForm.delete_user, IsAdmin()))
 async def delete_user(message: Message, bot: Bot, state: FSMContext):
     try:
         scammer_id = int(message.text)
@@ -144,7 +155,7 @@ async def delete_user(message: Message, bot: Bot, state: FSMContext):
             await message.answer("Пользователя нет в базе  🚫")
 
 
-@router.message(AdminForm.get_user)
+@router.message(and_f(AdminForm.get_user, IsAdmin()))
 async def get_user(message: Message, bot: Bot, state: FSMContext):
     if message.user_shared or (message.forward_from is not None and message.forward_from.id != message.from_user.id):
         await message.answer("Профиль мошенника получен  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
@@ -157,7 +168,7 @@ async def get_user(message: Message, bot: Bot, state: FSMContext):
                              "Попробуйте отправить пользователя кнопкной ниже 👇👇👇")
 
 
-@router.message(AdminForm.get_username)
+@router.message(and_f(AdminForm.get_username, IsAdmin()))
 async def get_username(message: Message, state: FSMContext):
     if message.text:
         data = await state.get_data()
@@ -172,7 +183,7 @@ async def get_username(message: Message, state: FSMContext):
         await message.answer("Пожалуйста, отправьте корректный username")
 
 
-@router.message(AdminForm.get_proofs)
+@router.message(and_f(AdminForm.get_proofs, IsAdmin()))
 async def get_proofs(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
     await state.set_state(AdminForm.apply_proofs)
@@ -186,14 +197,14 @@ async def get_proofs(message: Message, bot: Bot, state: FSMContext):
     await state.set_data(data)
 
 
-@router.callback_query(AdminForm.apply_proofs)
+@router.callback_query(and_f(AdminForm.apply_proofs, IsAdmin()))
 async def apply_proofs(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.answer()
     await call.message.answer("Отправьте причину, по которой мошенник заносится в базу")
     await state.set_state(AdminForm.get_reason)
 
 
-@router.message(AdminForm.get_reason)
+@router.message(and_f(AdminForm.get_reason, IsAdmin()))
 async def get_reason(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
     scammer = data["scammer"]
@@ -232,7 +243,7 @@ async def get_reason(message: Message, bot: Bot, state: FSMContext):
     await message.answer("Мошенник добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
 
 
-@router.callback_query(F.data == "add_ref")
+@router.callback_query(and_f(F.data == "add_ref", IsAdmin()))
 async def add_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.answer()
     await call.message.answer(
@@ -242,7 +253,7 @@ async def add_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
     await state.set_state(AddRef.here_title)
 
 
-@router.message(AddRef.here_title)
+@router.message(and_f(AddRef.here_title, IsAdmin()))
 async def add_ref_here_title(message: Message, bot: Bot, state: FSMContext):
     ref = RefScheme(title=message.text)
     await ref_service.add_ref(ref)
@@ -250,7 +261,7 @@ async def add_ref_here_title(message: Message, bot: Bot, state: FSMContext):
     await state.clear()
 
 
-@router.callback_query(F.data == "delete_ref")
+@router.callback_query(and_f(F.data == "delete_ref", IsAdmin()))
 async def delete_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.answer()
     await call.message.answer(
@@ -260,7 +271,7 @@ async def delete_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
     await state.set_state(DeleteRef.here_number)
 
 
-@router.message(DeleteRef.here_number)
+@router.message(and_f(DeleteRef.here_number, IsAdmin()))
 async def delete_ref_here_number(message: Message, bot: Bot, state: FSMContext):
     await ref_service.delete_ref(int(message.text) - 1)
     await message.answer("Реф. ссылка успешно удалена")
