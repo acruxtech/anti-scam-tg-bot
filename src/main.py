@@ -17,7 +17,7 @@ from src.database import engine, Base
 
 
 async def start():
-    if(os.path.isfile('bot.log')):
+    if os.path.isfile('bot.log'):
         os.remove('bot.log')
 
     logging.basicConfig(
@@ -56,7 +56,7 @@ async def start():
     dp.shutdown.register(get_stop)
 
     try:
-        await dp.start_polling(bot, allowed_updates=["message", "callback_query", "my_chat_member", "inline_query", "chosen_inline_result"])
+        await dp.start_polling(bot, allowed_updates=["message", "callback_query", "my_chat_member", "chat_member", "inline_query", "chosen_inline_result"])
     finally:
         await bot.session.close()
 

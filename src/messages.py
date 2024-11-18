@@ -8,10 +8,6 @@ def get_start_message(message: Message) -> str:
 <b>Добавляй</b> скам-пользователя/канал в <b>нашего бота.</b>
 
 <b>Узнавай больше про TG:</b> <a href="https://t.me/prosto_telegram1">PROSTO TELEGRAM</a>
-
-<b>Наш чат</b> – <a href="https://t.me/+Ech10tlczSs1ZmFi">Комитет Админов</a>
-
-<b>Партнёр</b> - <a href="https://t.me/adm_blackhole">BLACK HOLE</a>
 """
     return start_message
 

@@ -18,9 +18,6 @@ async def add_quickly_scammer(message: Message):
         return
 
     data = message.text.split(" ")
-    print(data)
-
-    scammer_id, proof_text = 0, ""
 
     try:
         scammer_id, proof_text = int(data[1]), " ".join(data[2:])

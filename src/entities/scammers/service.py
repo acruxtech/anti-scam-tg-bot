@@ -80,7 +80,8 @@ class ScammerService:
             media[i]["scammer_id"] = scammer_from_db.id
             media[i]["proof_id"] = proof_from_db.id
 
-        await self.scammer_media_repository.create_many(media)
+        if media:
+            await self.scammer_media_repository.create_many(media)
 
         return scammer_from_db, proof_from_db
 

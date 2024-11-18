@@ -19,10 +19,11 @@ def get_main_menu_keyboard(user_id: int):
     keyboard_builder.add(request_button)
     keyboard_builder.button(text="Добавить мошенника ✍️")
     keyboard_builder.button(text="Связаться с нами  📞")
+    keyboard_builder.button(text="Полезное 💡")
 
     if user_id in OWNER_IDS:
         keyboard_builder.button(text="Зайти в админку  📊")
-        keyboard_builder.adjust(1, 1, 2)
+        keyboard_builder.adjust(1, 1, 2, 1, 1)
     else:
         keyboard_builder.adjust(1, 1, 2, 1)
 
@@ -110,6 +111,12 @@ def get_send_media_scammer_keyboard():
     return keyboard_builder.as_markup()
 
 
+def get_apply_send_keyboard(scammer_id: int):
+    keyboard_builder = InlineKeyboardBuilder()
+    keyboard_builder.button(text="Разослать", callback_data=f"apply_send_{scammer_id}")
+    return keyboard_builder.as_markup()
+
+
 def get_contact_cancel_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
 
@@ -129,9 +136,38 @@ def get_empty_keyboard():
     return ReplyKeyboardRemove(remove_keyboard=True)
 
 
+def get_back_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder.button(text="Назад")
+    return keyboard_builder.as_markup(
+        resize_keyboard=True, one_time_keyboard=True,
+    )
+
+
 def get_username_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
     keyboard_builder.button(text="Продолжить без username")
+    keyboard_builder.button(text="Назад")
+    keyboard_builder.adjust(1, 1)
     return keyboard_builder.as_markup(
         resize_keyboard=True, one_time_keyboard=True, input_field_placeholder="Скиньте username?"
+    )
+
+
+def get_useful_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder.button(text="Гаранты")
+    keyboard_builder.button(text="Поддержка TG")
+    keyboard_builder.button(text="Назад")
+    keyboard_builder.adjust(2, 1)
+    return keyboard_builder.as_markup(
+        resize_keyboard=True, one_time_keyboard=True,
+    )
+
+
+def get_go_to_menu_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder.button(text="Назад")
+    return keyboard_builder.as_markup(
+        resize_keyboard=True, one_time_keyboard=True,
     )

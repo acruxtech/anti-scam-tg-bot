@@ -1,5 +1,6 @@
 import logging
 import random
+from contextlib import suppress
 
 from aiogram import Bot, Router, F
 from aiogram.types import Message, CallbackQuery, User
@@ -10,6 +11,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from src.config import MODERATOR_ID, OWNER_IDS
+from src.entities.chats.service import chat_service
 
 from src.keyboards.basic import (
     get_send_user_keyboard,
@@ -19,7 +21,7 @@ from src.keyboards.basic import (
     get_report_keyboard,
     get_send_channel_keyboard,
     get_username_keyboard,
-    get_empty_keyboard,
+    get_empty_keyboard, get_apply_send_keyboard, get_back_keyboard,
 )
 from src.keyboards.menu import get_report_message
 from src.keyboards.admin import get_text_edit_keyboard
@@ -33,7 +35,8 @@ from src.entities.scammers.service import scammers_service
 from src.entities.scammers.models import media_repository, proof_repository
 
 from src.utils.callbacks import ProofMessage
-from src.utils.scammers import get_scammer_data_from_message
+from src.utils.media import create_media
+from src.utils.scammers import get_scammer_data_from_message, create_message_about_scammer
 
 scammer_router = Router()
 
@@ -97,7 +100,7 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
 
         await message.answer(
             "Пришлите username пользователя:\n\n"
-                "Если его нет, нажмите кнопку ниже  👇👇👇",
+            "Если его нет, нажмите кнопку ниже  👇👇👇",
             reply_markup=get_username_keyboard()
         )
         await state.set_state(AddScammerForm.get_username)
@@ -107,7 +110,7 @@ async def get_scam(message: Message, bot: Bot, state: FSMContext):
         await state.update_data(scammer=scammer)
         await message.answer(
             "Отправь юзернейм канала или его ссылку",
-            reply_markup=get_empty_keyboard(),
+            reply_markup=get_back_keyboard(),
         )
         await state.set_state(AddScammerForm.get_link)
     else:
@@ -126,7 +129,7 @@ async def get_link(message: Message, bot: Bot, state: FSMContext):
     await state.update_data(scammer=scammer)
     await message.answer(
         "Распиши ситуацию, которая произошла у тебя с каналом:",
-        reply_markup=get_empty_keyboard(),
+        reply_markup=get_back_keyboard(),
     )
     await state.set_state(AddScammerForm.get_proofs)
 
@@ -146,7 +149,7 @@ async def get_username(message: Message, bot: Bot, state: FSMContext):
         await message.answer(
             "Распиши ситуацию, которая произошла у тебя с мошенником:\n\n"
             "<b>Важно:</b> в тексте также укажите все актуальные юзернеймы, если такие есть:",
-            reply_markup=get_empty_keyboard(),
+            reply_markup=get_back_keyboard(),
         )
         await state.set_state(AddScammerForm.get_proofs)
     else:
@@ -284,6 +287,20 @@ async def get_edited_text(message: Message, bot: Bot, state: FSMContext):
         await message.answer("Мошенник был добавлен без изменения текста  ✅")
 
     await scammers_service.confirm(callback_data_scammer_id)
+
+    # get scammer message
+    scammer = await scammers_service.get_scammer(callback_data_scammer_id)
+    proof, msg = await create_message_about_scammer(scammer)
+
+    await message.answer("Подтвердите отправку по чатам", reply_markup=get_apply_send_keyboard(scammer.id))
+
+    # chats = await chat_service.get_chats()
+    # print(chats)
+    # for chat in chats:
+    #     with suppress(BaseException):
+    #         if proof:
+    #             await create_media(scammer, proof, message, bot, msg, chat_id=chat.id, with_suffix=False)
+
     try:
         await bot.edit_message_text(
             f"{message.from_user.username} добавил мошенника в базу  ✅",

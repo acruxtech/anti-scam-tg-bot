@@ -24,7 +24,11 @@ F: Message
 
 @router.message(F.text == "Связаться с нами  📞")
 async def start_contact(message: Message, bot: Bot, state: FSMContext):
-    await message.answer("Напишите сообщение и мы ответим на него! 👇👇👇", reply_markup=get_contact_cancel_keyboard())
+    await message.answer(
+        "Тут Вы можете задать любой вопрос по сервису, оставить отзыв или "
+        "подсказать как сделать AntiSkamTG ещё полезнее!",
+        reply_markup=get_contact_cancel_keyboard()
+    )
     await state.set_state(ContactState.get_contact_text)
 
 

@@ -1,4 +1,4 @@
-from contextlib import suppress
+import logging
 
 from aiogram import Router, Bot, F
 from aiogram.types import ChatMemberUpdated, InlineQueryResultArticle, InputTextMessageContent, InlineQuery, ChosenInlineResult
@@ -13,6 +13,7 @@ from src.entities.users.service import user_service
 
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=ADMINISTRATOR))
@@ -40,7 +41,7 @@ async def check_new_member(event: ChatMemberUpdated, bot: Bot):
     scammer = await scammers_service.get_scammer_by_all(event.from_user.id, event.from_user.username)
 
     if scammer and scammer.id == event.from_user.id:
-        print(f"Пользователь найден! Был забанен! id = {scammer.id}, username = {scammer.username}")
+        logger.info(f"Пользователь найден! Был забанен! id = {scammer.id}, username = {scammer.username}")
         await bot.ban_chat_member(event.chat.id, event.from_user.id)
 
 
@@ -69,12 +70,24 @@ async def inline(inline_query: InlineQuery, bot: Bot):
 
     scammer = await scammers_service.get_scammer(scammer_id)
     if not scammer:
-        return
+        results = []
+        results.append(
+            InlineQueryResultArticle(
+                id="no_scammer",
+                title="Пользователя нет в базе!",
+                input_message_content=InputTextMessageContent(
+                    message_text=f"❌Пользователя с ID {scammer_id} <b>нет в базе</b>. Блокировка невозможна",
+                    parse_mode="html",
+                    disable_web_page_preview=True,
+                )
+            )
+        )
+        return await inline_query.answer(results, is_personal=True)
 
     results = []
     results.append(
         InlineQueryResultArticle(
-            id="0",
+            id="block",
             title="Заблокировать",
             input_message_content=InputTextMessageContent(
                 message_text=f"❌Пользователь ID <a href='https://t.me/{scammer.username}'>{scammer_id}</a> <b>найден в базе</b> и заблокирован во всех чатах, в которых бот состоит как админ\n\n@AntiSkamTG_bot",
@@ -88,10 +101,14 @@ async def inline(inline_query: InlineQuery, bot: Bot):
 
 @router.chosen_inline_result()
 async def inline_here_id(chosen_result: ChosenInlineResult, bot: Bot):
+    if chosen_result.result_id == "no_scammer":
+        return
+
     scammer_id = int(chosen_result.query)
 
     chats = await chat_service.get_chats()
     for chat in chats:
-        with suppress(BaseException):
+        try:
             await bot.ban_chat_member(chat.id, scammer_id)
-    
+        except BaseException as e:
+            logger.error(e)

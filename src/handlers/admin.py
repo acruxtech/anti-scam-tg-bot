@@ -1,17 +1,21 @@
+from contextlib import suppress
+
 from aiogram import Bot, Router, F
-from aiogram.filters import Filter, and_f
+from aiogram.filters import Filter, and_f, or_f
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
 from src.entities.scammers.service import scammers_service
+from src.utils.media import create_media
 from src.utils.excel import create_list_scammer
 from src.keyboards.admin import get_admin_inline_keyboard, get_apply_photos_inline_keyboard, get_back_inline_keyboard
-from src.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard
-from src.utils.scammers import get_scammer_data_from_message
+from src.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard, get_apply_send_keyboard
+from src.utils.scammers import get_scammer_data_from_message, create_message_about_scammer
 from src.entities.scammers.models import proof_repository
 from src.repository import IntegrityException
 from src.entities.users.models import user_repository
+from src.entities.chats.service import chat_service
 from src.entities.refs.service import ref_service
 from src.entities.refs.schemas import RefScheme
 from src.entities.scammers.schemas import ScammerScheme
@@ -105,7 +109,8 @@ async def get_list_scammer(call: CallbackQuery, bot: Bot):
 @router.callback_query(and_f(F.data == "add_scammer", IsAdmin()))
 async def start_add_scammer(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.message.answer(
-        "Перешлите сообщение мошенника или отправьте его кнопкой ниже 👇👇👇", reply_markup=get_send_user_keyboard()
+        "Перешлите сообщение мошенника или отправьте его ид или отправьте профиль кнопкой ниже 👇👇👇",
+        reply_markup=get_send_user_keyboard()
     )
     await state.set_state(AdminForm.get_user)
     await call.answer()
@@ -157,7 +162,11 @@ async def delete_user(message: Message, bot: Bot, state: FSMContext):
 
 @router.message(and_f(AdminForm.get_user, IsAdmin()))
 async def get_user(message: Message, bot: Bot, state: FSMContext):
-    if message.user_shared or (message.forward_from is not None and message.forward_from.id != message.from_user.id):
+    if (
+        message.user_shared or
+        message.forward_from is not None and message.forward_from.id != message.from_user.id or
+        (message.text and message.text.isdigit())
+    ):
         await message.answer("Профиль мошенника получен  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
         await message.answer("Напишите username мошенника:")
         scammer = get_scammer_data_from_message(message)
@@ -186,7 +195,6 @@ async def get_username(message: Message, state: FSMContext):
 @router.message(and_f(AdminForm.get_proofs, IsAdmin()))
 async def get_proofs(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
-    await state.set_state(AdminForm.apply_proofs)
 
     if message.photo:
         data["type"] = "photo"
@@ -197,8 +205,13 @@ async def get_proofs(message: Message, bot: Bot, state: FSMContext):
     await state.set_data(data)
 
 
-@router.callback_query(and_f(AdminForm.apply_proofs, IsAdmin()))
+@router.callback_query(and_f(AdminForm.get_proofs, IsAdmin()))
 async def apply_proofs(call: CallbackQuery, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    if not data.get("media", None):
+        data["media"] = []
+        data["type"] = "only_text"
+    await state.set_data(data)
     await call.answer()
     await call.message.answer("Отправьте причину, по которой мошенник заносится в базу")
     await state.set_state(AdminForm.get_reason)
@@ -229,18 +242,42 @@ async def get_reason(message: Message, bot: Bot, state: FSMContext):
                 "type": "photo",
                 "scammer_id": scammer.id
             })
-    if message.video:
+    if data["type"] == "video":
         for media_file_id in media_src:
             media.append({
                 "file_id": media_file_id,
                 "type": "video",
                 "scammer_id": scammer.id
             })
+    if data["type"] == "only_text":
+        media = []
 
-    scammer_created, proof = await scammers_service.save(scammer_schema, proof_schema, media, decision=True, moderator_id=message.from_user.id)    
+    scammer_created, proof = await scammers_service.save(scammer_schema, proof_schema, media, decision=True, moderator_id=message.from_user.id)
     await scammers_service.confirm(scammer_created.id)
+
+    await message.answer("Подтвердите отправку по чатам", reply_markup=get_apply_send_keyboard(scammer.id))
+
     await state.clear()
     await message.answer("Мошенник добавлен в базу  ✅", reply_markup=get_main_menu_keyboard(message.from_user.id))
+
+
+@router.callback_query(and_f(F.data.contains("apply_send"), IsAdmin()))
+async def add_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await call.answer()
+
+    scammer = await scammers_service.get_scammer(int(call.data.split("_")[-1]))
+    chats = await chat_service.get_chats()
+    for chat in chats:
+        with suppress(BaseException):
+            proof, msg = None, ""
+
+            if scammer:
+                proof, msg = await create_message_about_scammer(scammer)
+
+            if proof:
+                await create_media(scammer, proof, call.message, bot, msg, chat_id=chat.id, with_suffix=False)
+    await call.message.answer("Скамер разослан по чатам")
+
 
 
 @router.callback_query(and_f(F.data == "add_ref", IsAdmin()))

@@ -27,7 +27,7 @@ class RateLimitMiddleware(BaseMiddleware):
         now = datetime.datetime.now()
         self.storage[user_id] = [t for t in self.storage[user_id] if (now - t).seconds < self.interval]
 
-        print(len(self.storage[user_id]))
+        # print(len(self.storage[user_id]))
 
         if len(self.storage[user_id]) >= self.limit:
             if isinstance(event, types.Message):

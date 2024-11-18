@@ -22,9 +22,6 @@ class AlbumsMiddleware(BaseMiddleware):
             event: TelegramObject,
             data: Dict[str, Any],
     ) -> Any:
-
-        print("Альбом id =", "ewqwewqqweweqwqewqew")
-
         if not isinstance(event, Message):
             print("%s used not for Message, but for %s", self.__class__.__name__, type(event))
             return await handler(event, data)
@@ -37,8 +34,6 @@ class AlbumsMiddleware(BaseMiddleware):
             return await handler(event, data)
 
         album_id: str = event.media_group_id
-
-        print("Альбом id =", album_id)
 
         async with self.lock:
             self.albums_cache.setdefault(album_id, list())
