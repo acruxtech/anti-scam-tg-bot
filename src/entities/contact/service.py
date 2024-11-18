@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.repository import RepositoryInterface
+from src.db.repository import RepositoryInterface
 from src.entities.contact.models import contact_manage_repository
 
 

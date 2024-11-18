@@ -1,33 +1,32 @@
-import json
 import logging
 from aiogram import Bot, Router, F
 from aiogram.enums import ParseMode
-from aiogram.types import Message, FSInputFile, ChatMemberUpdated
+from aiogram.types import Message, FSInputFile
 from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from src.messages import get_start_message
-from src.keyboards.basic import get_main_menu_keyboard, get_check_keyboard, get_useful_keyboard, get_go_to_menu_keyboard
+from src.utils.messages import get_start_message, get_garants_message, get_tg_support_message
+from src.keyboards.basic import get_main_menu_keyboard, get_check_keyboard, get_useful_keyboard, \
+    get_go_to_menu_keyboard, get_back_keyboard
 from src.entities.users.schemas import UserScheme
 from src.entities.users.service import user_service
 from src.entities.scammers.service import scammers_service
 from src.entities.refs.service import ref_service
-from src.entities.scammers.models import proof_repository
 from src.utils.media import create_media
 from src.utils.scammers import create_message_about_scammer
 
+
 basic_router = Router()
 logger = logging.getLogger(__name__)
-
 F: Message
 
 
 @basic_router.message(Command("start"))
-async def start(message: Message, command: CommandObject, bot: Bot, state: FSMContext):
+async def start(message: Message, command: CommandObject, state: FSMContext):
     await state.clear()
 
-    photo_path = r"./media/systems/menu.png"
+    photo_path = r"./assets/media/systems/menu.png"
     await message.answer_photo(
         FSInputFile(photo_path),
         caption=get_start_message(message),
@@ -64,7 +63,7 @@ async def start(message: Message, bot: Bot):
     user = UserScheme(**message.from_user.model_dump())
     await user_service.add_user(user)
 
-    photo_path = r"./media/systems/admin.PNG"
+    photo_path = r"./assets/media/systems/admin.PNG"
     await message.answer_photo(
         FSInputFile(photo_path),
         caption="Чтобы я мог следить за мошенниками в вашем канале, сделайте следующее:\n\n"
@@ -84,7 +83,7 @@ async def get_chat(message: Message, bot: Bot):
     if scammer:
         proof, msg = await create_message_about_scammer(scammer)
     else:
-        await message.answer("Данный канал не был найден в базе, но будьте осторожны")
+        return await message.answer("Данный канал не был найден в базе, но будьте осторожны")
 
     await create_media(scammer, proof, message, bot, msg)
 
@@ -99,7 +98,7 @@ async def get_contact(message: Message, bot: Bot):
     if scammer:
         proof, msg = await create_message_about_scammer(scammer)
     else:
-        await message.answer(f"Данный пользователь в базе не найден, но будьте осторожны! ID {message.text}")
+        return await message.answer(f"Данный пользователь в базе не найден, но будьте осторожны! ID {message.text}")
 
     await create_media(scammer, proof, message, bot, msg)
 
@@ -111,13 +110,13 @@ class ScammerSearchState(StatesGroup):
 
 @basic_router.message(F.text == "Проверить по ID")
 async def get_text_contact(message: Message, state: FSMContext):
-    await message.answer("Введите ID пользователя:")
+    await message.answer("Введите ID пользователя:", reply_markup=get_back_keyboard())
     await state.set_state(ScammerSearchState.get_scammer_id)
 
 
 @basic_router.message(F.text == "Проверить по Username")
 async def get_text_contact(message: Message, state: FSMContext):
-    await message.answer("Введите Username пользователя:")
+    await message.answer("Введите Username пользователя:", reply_markup=get_back_keyboard())
     await state.set_state(ScammerSearchState.get_scammer_username)
 
 
@@ -126,13 +125,16 @@ async def get_scammer_id(message: Message, state: FSMContext, bot: Bot):
     try:
         scammer_id = int(message.text)
     except ValueError as e:
-        print(e)
-        await message.answer("Введите корректный ID")
+        logger.error(e)
+        await message.answer("Введите корректный ID", reply_markup=get_back_keyboard())
     else:
         scammer = await scammers_service.get_scammer(scammer_id)
 
         if not scammer:
-            await message.answer(f"Данный пользователь в базе не найден, но будьте осторожны! ID {message.text}")
+            await message.answer(
+                f"Данный пользователь в базе не найден, но будьте осторожны! ID {message.text}",
+                reply_markup=get_back_keyboard()
+            )
             await state.clear()
             return
 
@@ -153,7 +155,11 @@ async def get_scammer_username(message: Message, state: FSMContext, bot: Bot):
     if scammer:
         proof, msg = await create_message_about_scammer(scammer)
     else:
-        await message.answer(f"Данный пользователь в базе не найден, но будьте осторожны! Юзернейм {message.text}")
+        await message.answer(
+            f"Данный пользователь в базе не найден, но будьте осторожны! Юзернейм {message.text}",
+            reply_markup=get_back_keyboard()
+        )
+        return
     await create_media(scammer, proof, message, bot, msg)
 
     await state.clear()
@@ -174,12 +180,7 @@ async def garants(message: Message, bot: Bot, state: FSMContext):
     await state.clear()
 
     await message.answer(
-        "@el_capitano8\n"
-        "@hooligan154\n"
-        "@SEgarant\n"
-        "@aizek\n"
-        "@hozyaintelegi\n"
-        "@Qu3rs\n",
+        get_garants_message(),
         reply_markup=get_go_to_menu_keyboard(),
     )
 
@@ -189,43 +190,7 @@ async def useful(message: Message, bot: Bot, state: FSMContext):
     await state.clear()
 
     await message.answer(
-        """
-<b>Почта/сайты поддержки Телеграм:</b>
-
-Официальный Телеграм FAQ — https://telegram.org/faq
-
-Задать вопрос (волонтерам) в приложении — Меню -> настройки -> задать вопрос
-
-Сообщить о нелегальном контенте в Телеграм —  abuse@telegram.org
-
-Разблокировать аккаунт, канал, группу, бота — recover@telegram.org
-
-Нарушения авторских прав (DMCA) — dmca@telegram.org
-
-Ошибки и предложения — https://bugs.telegram.org
-
-Проблемы со входом — sms@telegram.org
-
-Жалоба на стикеры — sticker@telegram.org
-
-Детское насилие — stopCA@telegram.org
-
-Общая поддержка — support@telegram.org
-
-Вопросы безопасности — security@telegram.org
-
-<b>Полезные Боты:</b>
-
-Сообщить о мошенниках — @NoToScam
-Связь с пресс службой — @PressBot
-Информация о блокировке — @spambot
-Конфиденциальность данных — @EURegulation
-Получение занятого никнейма — @username_bot
-Добавить мошенника/канал в базу скамеров - @AntiSkamTG_bot
-
-<b>Будьте внимательны:</b> у Телеграм нет других официальных учетных записей службы поддержки ни в каких 
-других социальных сетях. Официальный источник: https://telegram.org/faq#telegram-support
-""",
+        get_tg_support_message(),
         parse_mode=ParseMode.HTML,
         disable_web_page_preview=True,
         reply_markup=get_go_to_menu_keyboard(),

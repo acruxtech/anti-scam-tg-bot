@@ -3,8 +3,8 @@ from datetime import datetime
 from sqlalchemy import BigInteger, DateTime, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database import Base
-from src.repository import SQLAlchemyRepository
+from src.db.database import Base
+from src.db.repository import SQLAlchemyRepository
 
 
 class Scammer(Base):

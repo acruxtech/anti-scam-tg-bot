@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.repository import RepositoryInterface, IntegrityException
+from src.db.repository import RepositoryInterface, IntegrityException
 
 from src.entities.users.models import user_repository
 from src.entities.users.schemas import UserScheme

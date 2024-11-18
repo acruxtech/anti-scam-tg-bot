@@ -1,19 +1,18 @@
 from contextlib import suppress
 
 from aiogram import Bot, Router, F
-from aiogram.filters import Filter, and_f, or_f
+from aiogram.filters import and_f
 from aiogram.types import Message, CallbackQuery, FSInputFile
-from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
 from src.entities.scammers.service import scammers_service
+from src.filters.admin import IsAdmin
+from src.states.admin import AdminForm, AddRef, DeleteRef
 from src.utils.media import create_media
 from src.utils.excel import create_list_scammer
 from src.keyboards.admin import get_admin_inline_keyboard, get_apply_photos_inline_keyboard, get_back_inline_keyboard
 from src.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard, get_apply_send_keyboard
 from src.utils.scammers import get_scammer_data_from_message, create_message_about_scammer
-from src.entities.scammers.models import proof_repository
-from src.repository import IntegrityException
 from src.entities.users.models import user_repository
 from src.entities.chats.service import chat_service
 from src.entities.refs.service import ref_service
@@ -21,39 +20,10 @@ from src.entities.refs.schemas import RefScheme
 from src.entities.scammers.schemas import ScammerScheme
 from src.entities.scammers.schemas import ProofScheme
 from src.entities.refs.models import Ref
-from src.config import OWNER_IDS
-
-
-class AdminForm(StatesGroup):
-    get_user = State()
-    get_username = State()
-    get_proofs = State()
-    apply_proofs = State()
-    get_reason = State()
-    delete_user = State()
-
-
-class AddRef(StatesGroup):
-    here_title = State()
-
-
-class DeleteRef(StatesGroup):
-    here_number = State()
 
 
 router = Router()
-
-
 F: Message
-
-
-class IsAdmin(Filter):
-    def __init__(self) -> None:
-        pass 
-
-    async def __call__(self, message: Message) -> bool:
-        return message.from_user.id in OWNER_IDS
-
 
 
 @router.message(F.text == "Назад")
@@ -75,8 +45,11 @@ F: CallbackQuery
 @router.callback_query(and_f(F.data == "admin", IsAdmin()))
 async def open_admin(call: CallbackQuery, bot: Bot, state: FSMContext):
     await state.clear()
-    await call.message.answer("Вы зашли в админку \n\n"
-                         "Выберите действие:", reply_markup=get_admin_inline_keyboard())
+    await call.message.answer(
+        "Вы зашли в админку \n\n"
+        "Выберите действие:",
+        reply_markup=get_admin_inline_keyboard()
+    )
     await call.answer()
 
 
@@ -277,7 +250,6 @@ async def add_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
             if proof:
                 await create_media(scammer, proof, call.message, bot, msg, chat_id=chat.id, with_suffix=False)
     await call.message.answer("Скамер разослан по чатам")
-
 
 
 @router.callback_query(and_f(F.data == "add_ref", IsAdmin()))

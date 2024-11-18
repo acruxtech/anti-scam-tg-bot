@@ -1,7 +1,13 @@
 import logging
 
 from aiogram import Router, Bot, F
-from aiogram.types import ChatMemberUpdated, InlineQueryResultArticle, InputTextMessageContent, InlineQuery, ChosenInlineResult
+from aiogram.types import (
+    ChatMemberUpdated,
+    InlineQueryResultArticle,
+    InputTextMessageContent,
+    InlineQuery,
+    ChosenInlineResult
+)
 from aiogram.filters.chat_member_updated import (
     ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, IS_MEMBER
 )
@@ -65,7 +71,8 @@ async def bot_deleted(event: ChatMemberUpdated, bot: Bot):
 async def inline(inline_query: InlineQuery, bot: Bot):
     try:
         scammer_id = int(inline_query.query)
-    except BaseException:
+    except BaseException as e:
+        logger.error(e)
         return
 
     scammer = await scammers_service.get_scammer(scammer_id)

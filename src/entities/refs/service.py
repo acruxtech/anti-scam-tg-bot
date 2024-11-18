@@ -1,9 +1,8 @@
 from datetime import datetime
 
-from src.repository import RepositoryInterface, IntegrityException
+from src.db.repository import RepositoryInterface, IntegrityException
 
 from src.entities.refs.models import Ref, ref_repository
-from src.entities.refs.schemas import RefScheme
 
 
 class RefService:

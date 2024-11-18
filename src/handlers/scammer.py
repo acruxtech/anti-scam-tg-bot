@@ -1,17 +1,11 @@
-import logging
-import random
-from contextlib import suppress
-
 from aiogram import Bot, Router, F
 from aiogram.types import Message, CallbackQuery, User
-from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.media_group import MediaGroupBuilder
 
-from src.config import MODERATOR_ID, OWNER_IDS
-from src.entities.chats.service import chat_service
+from src.config import MODERATOR_ID
 
 from src.keyboards.basic import (
     get_send_user_keyboard,
@@ -21,21 +15,20 @@ from src.keyboards.basic import (
     get_report_keyboard,
     get_send_channel_keyboard,
     get_username_keyboard,
-    get_empty_keyboard, get_apply_send_keyboard, get_back_keyboard,
+    get_apply_send_keyboard, get_back_keyboard,
 )
 from src.keyboards.menu import get_report_message
 from src.keyboards.admin import get_text_edit_keyboard
 
 from src.utils.callbacks import AddScamer
 
-from src.messages import get_about_scammer_message
+from src.utils.messages import get_about_scammer_message
 
-from src.entities.scammers.schemas import ScammerScheme, ScammerAnsweredScheme, ProofScheme
+from src.entities.scammers.schemas import ScammerScheme, ProofScheme
 from src.entities.scammers.service import scammers_service
 from src.entities.scammers.models import media_repository, proof_repository
 
 from src.utils.callbacks import ProofMessage
-from src.utils.media import create_media
 from src.utils.scammers import get_scammer_data_from_message, create_message_about_scammer
 
 scammer_router = Router()

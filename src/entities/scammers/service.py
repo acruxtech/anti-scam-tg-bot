@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from src.entities.scammers.schemas import ScammerScheme, ProofScheme
-from src.repository import RepositoryInterface, IntegrityException
+from src.db.repository import RepositoryInterface, IntegrityException
 from src.entities.scammers.models import scammers_repository, media_repository, proof_repository
 
 

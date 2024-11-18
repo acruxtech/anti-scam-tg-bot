@@ -3,10 +3,9 @@ from datetime import datetime
 from sqlalchemy import BigInteger, DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.repository import SQLAlchemyRepository
-from src.database import Base
+from src.db.repository import SQLAlchemyRepository
+from src.db.database import Base
 from src.entities.scammers.models import Proof
-from src.entities.refs.models import Ref
 
 
 class User(Base):

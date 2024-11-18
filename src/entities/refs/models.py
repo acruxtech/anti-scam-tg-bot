@@ -1,10 +1,8 @@
-from datetime import datetime
-
 from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.repository import SQLAlchemyRepository
-from src.database import Base
+from src.db.repository import SQLAlchemyRepository
+from src.db.database import Base
 
 
 class Ref(Base):

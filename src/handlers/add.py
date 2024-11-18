@@ -1,4 +1,5 @@
-from aiogram import Bot, Router, F
+from aiogram import Router, F
+from aiogram.filters import and_f
 from aiogram.types import Message
 
 from src.config import OWNER_IDS
@@ -6,17 +7,14 @@ from src.config import OWNER_IDS
 from src.entities.scammers.schemas import ScammerScheme
 from src.entities.scammers.service import scammers_service
 from src.entities.scammers.models import proof_repository
+from src.filters.admin import IsAdmin
 
 router = Router()
-
 F: Message
 
 
-@router.message(F.text.startswith("/add"))
+@router.message(and_f(F.text.startswith("/add"), IsAdmin()))
 async def add_quickly_scammer(message: Message):
-    if message.from_user.id not in OWNER_IDS:
-        return
-
     data = message.text.split(" ")
 
     try:

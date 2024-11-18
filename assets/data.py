@@ -2,7 +2,7 @@ import re
 import csv
 
 
-with open("scammer_data.txt", "r", encoding="utf-8") as f:
+with open("assets/scammer_data.txt", "r", encoding="utf-8") as f:
     scammer_data = f.read()
 
 
@@ -37,7 +37,7 @@ for input_string in scammer_data.splitlines():
                 }
             )
 
-with open("scammer_data.csv", newline='', encoding='utf-8') as csvfile:
+with open("assets/scammer_data.csv", newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         user_id = int(row['id'])
