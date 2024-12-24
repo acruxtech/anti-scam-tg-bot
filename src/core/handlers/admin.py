@@ -1,8 +1,12 @@
+import asyncio
 from contextlib import suppress
+from datetime import datetime
 
 from aiogram import Bot, Router, F
+from aiogram.exceptions import AiogramError
 from aiogram.filters import and_f
-from aiogram.types import Message, CallbackQuery, FSInputFile
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.types import Message, CallbackQuery, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from pyrogram import Client
 
@@ -15,17 +19,25 @@ from src.core.utils.excel import create_list_scammer
 from src.core.keyboards.admin import (
     get_admin_inline_keyboard,
     get_apply_photos_inline_keyboard,
-    get_back_inline_keyboard
+    get_back_inline_keyboard, get_mailing_keyboard, get_apply_mailing_keyboard
 )
 from src.core.keyboards.basic import get_send_user_keyboard, get_main_menu_keyboard, get_apply_send_keyboard
 from src.core.utils.scammers import get_scammer_data_from_message, create_message_about_scammer
 from src.core.services import ref_service, chat_service, user_service
 from src.core.schemas import RefScheme, ScammerScheme, ProofScheme
+from src.core.utils.variables import scheduler, bot
 from src.db.models import Ref
 
 
 router = Router()
 F: Message
+
+
+class Mailing(StatesGroup):
+    here_time = State()
+    forward_post = State()
+    apply = State()
+
 
 # @router.message()
 # async def rvfecds(message: Message, state: FSMContext):
@@ -298,4 +310,198 @@ async def delete_ref(call: CallbackQuery, bot: Bot, state: FSMContext):
 async def delete_ref_here_number(message: Message, bot: Bot, state: FSMContext):
     await ref_service.delete_ref(int(message.text) - 1)
     await message.answer("Реф. ссылка успешно удалена")
+    await state.clear()
+
+
+F: CallbackQuery
+
+
+@router.callback_query(and_f(F.data == "mailing", IsAdmin()))
+async def mailing(callback: CallbackQuery):
+    await callback.message.answer("Настройки рассылок", reply_markup=get_mailing_keyboard())
+    await callback.answer()
+
+
+@router.callback_query(and_f(F.data == "create_mailing", IsAdmin()))
+async def create_mailing(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer(
+        "Отправьте время рассылки в формате YYYY.MM.DD HH:MM (например, 2024.10.31 12:00)",
+    )
+    await callback.answer()
+    await state.set_state(Mailing.here_time.state)
+
+
+@router.message(and_f(Mailing.here_time, IsAdmin()))
+async def mailing_here_time(message: Message, state: FSMContext):
+    data = {}
+    try:
+        data["date"] = datetime.strptime(message.text, "%Y.%m.%d %H:%M")
+        await state.set_data(data)
+    except BaseException as e:
+        return await message.answer("Неправильный формат ввода! Попробуйте еще раз")
+
+    await message.answer("Отправьте пост для рассылки")
+    await state.set_state(Mailing.forward_post.state)
+
+
+@router.message(and_f(Mailing.forward_post, IsAdmin()))
+async def mailing_here_post(message: Message, state: FSMContext):
+    data = await state.get_data()
+    data["chat_id"] = message.chat.id
+    data["msg_id"] = message.message_id
+
+    if message.reply_markup:
+        inline_keyboard_json = [
+            [{"text": button.text, "url": button.url} for button in row]
+            for row in message.reply_markup.inline_keyboard
+        ]
+    else:
+        inline_keyboard_json = None
+
+    data["reply_markup"] = inline_keyboard_json
+    await state.set_data(data)
+
+    await message.bot.copy_message(
+        message.chat.id,
+        message.chat.id,
+        message.message_id,
+        reply_markup=message.reply_markup,
+    )
+
+    await message.answer(
+        f"Подтвердить запланирование рассылки на {data['date']}?",
+        reply_markup=get_apply_mailing_keyboard()
+    )
+    await state.set_state(Mailing.apply.state)
+
+
+@router.callback_query(and_f(F.data == "apply_mailing", Mailing.apply, IsAdmin()))
+async def apply_mailing(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+
+    user_ids = await user_service.get_ids()
+    filename = f"mailing_{data['date']}.txt"
+    with open(filename, "w") as f:
+        for user_id in user_ids:
+            f.write(f"{user_id}\n")
+
+    scheduler.add_job(
+        send_messages,
+        "date",
+        kwargs={
+            "chat_id": data["chat_id"],
+            "msg_id": data["msg_id"],
+            "reply_markup": data["reply_markup"],
+            "filename": filename,
+        },
+        run_date=data["date"],
+        misfire_grace_time=1000,
+        coalesce=True,
+    )
+
+    await callback.message.answer("Рассылка запланирована")
+    await callback.answer()
+    await state.clear()
+
+
+async def send_messages(chat_id: int, msg_id: int, reply_markup: list[list[dict]], filename: str):
+    success = 0
+    with_error = 0
+
+    msg = await bot.send_message(
+        chat_id,
+        "Рассылка запущена\n"
+        "Успешно: 0, неудачно: 0",
+    )
+
+    if reply_markup:
+        inline_keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text=button["text"], url=button["url"]) for button in row]
+                for row in reply_markup
+            ]
+        )
+    else:
+        inline_keyboard = None
+
+    with open(filename, "r") as f:
+        for user_id in f:
+            try:
+                user_id = int(user_id)
+
+                await bot.copy_message(
+                    user_id,
+                    chat_id,
+                    msg_id,
+                    reply_markup=inline_keyboard
+                )
+                success += 1
+                await asyncio.sleep(0.035)
+
+            except AiogramError as e:
+                ...
+            except BaseException:
+                with_error += 1
+
+            finally:
+                with suppress(BaseException):
+                    if (success + with_error) % 100 == 0:
+                        await msg.edit_text(
+                            "Рассылка запущена\n"
+                            f"Успешно: {success}, неудачно: {with_error}",
+                        )
+
+    with suppress(BaseException):
+        await msg.edit_text(
+            "Рассылка запущена\n"
+            f"Успешно: {success}, неудачно: {with_error}"
+        )
+    await bot.send_message(
+        chat_id,
+        "Рассылка завершена"
+    )
+
+
+@router.callback_query(and_f(F.data.startswith("cancel_mailing"), IsAdmin()))
+async def cancel_create_mailing(callback: CallbackQuery, state: FSMContext):
+    mailing_id = callback.data.split("_")[-1]
+    if mailing_id != "mailing":
+        scheduler.remove_job(mailing_id)
+    await callback.message.answer("Рассылка отменена")
+    await callback.answer()
+    await state.clear()
+
+
+@router.callback_query(and_f(F.data == "delete_mailing", IsAdmin()))
+async def cancel_mailing(callback: CallbackQuery):
+    await callback.answer()
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=task.next_run_time.strftime("%Y.%m.%d %H:%M"),
+                callback_data=f"cancel_mailing_{task.id}"
+            )
+        ]
+        for task in scheduler.get_jobs()
+    ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    keyboard.row_width = 1
+    await callback.message.answer(
+        "Выберите рассылку, которую надо удалить",
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(and_f(F.data == "export", IsAdmin()))
+async def export(callback: CallbackQuery, state: FSMContext):
+    with open("users.txt", "w") as f:
+        users_ids = await user_service.get_ids()
+        users_usernames = await user_service.get_usernames()
+        for user_id, username in zip(users_ids, users_usernames):
+            f.write(f"{user_id} @{username}\n")
+
+    # with open("users.txt", "r") as f:
+    await callback.message.answer_document(FSInputFile("users.txt"))
+
+    await callback.answer()
     await state.clear()

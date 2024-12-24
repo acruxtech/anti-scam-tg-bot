@@ -6,8 +6,8 @@ from aiogram import Bot, Dispatcher
 
 from src.core.middlewares.limit import RateLimitMiddleware
 from src.core.utils.systems import get_start, get_stop
-from src.config import BOT_TOKEN
 from src.core.handlers import admin, basic, contact, inline, add, scammer, chat
+from src.core.utils.variables import bot, scheduler
 from src.db.errors import DBError
 from src.db.models import Scammer
 
@@ -31,6 +31,8 @@ async def start():
         ]
     )
 
+    scheduler.start()
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -38,8 +40,6 @@ async def start():
         await Scammer.repository().create_many(scammer_ids_and_usernames)
     except DBError:
         print("Скамеры уже добавлены в базу")
-
-    bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
 
     dp = Dispatcher()
 

@@ -23,6 +23,12 @@ def get_admin_inline_keyboard():
     inline_keyboard_builder.button(
        text="Удалить реф. ссылку", callback_data="delete_ref"
     )
+    inline_keyboard_builder.button(
+        text="Рассылки", callback_data="mailing"
+    )
+    inline_keyboard_builder.button(
+        text="Выгруз", callback_data="export"
+    )
 
     inline_keyboard_builder.adjust(2, 1)
 
@@ -37,7 +43,6 @@ def get_text_edit_keyboard():
     return kb.as_markup(
         resize_keyboard=True, one_time_keyboard=True, input_field_placeholder="Напишите отредактированный текст..."
     )
-
 
 
 def get_apply_photos_inline_keyboard():
@@ -57,4 +62,26 @@ def get_back_inline_keyboard():
         text="Назад", callback_data="admin"
     )
 
+    return inline_keyboard_builder.as_markup()
+
+
+def get_mailing_keyboard():
+    inline_keyboard_builder = InlineKeyboardBuilder()
+    inline_keyboard_builder.button(
+        text="Создать рассылку", callback_data="create_mailing"
+    )
+    inline_keyboard_builder.button(
+        text="Удалить рассылку", callback_data="delete_mailing"
+    )
+    return inline_keyboard_builder.as_markup()
+
+
+def get_apply_mailing_keyboard():
+    inline_keyboard_builder = InlineKeyboardBuilder()
+    inline_keyboard_builder.button(
+        text="Отменить", callback_data="cancel_mailing"
+    )
+    inline_keyboard_builder.button(
+        text="Подтвердить", callback_data="apply_mailing"
+    )
     return inline_keyboard_builder.as_markup()

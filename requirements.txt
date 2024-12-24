@@ -9,3 +9,5 @@ aioschedule
 openpyxl
 pyrogram
 TgCrypto
+pytz
+APScheduler

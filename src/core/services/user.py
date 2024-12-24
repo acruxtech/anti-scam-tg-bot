@@ -27,6 +27,14 @@ class UserService:
         data = {"is_blocked": is_blocked}
         await self.repository.update(data, user_id)
 
+    async def get_usernames(self):
+        users = await self.repository.get_list()
+        return [user.username for user in users]
+
+    async def get_ids(self):
+        users = await self.repository.get_list()
+        return [user.id for user in users]
+
     # todo: move to repository
     async def count_users(self) -> tuple[int]:
         """Return misc counts about users
