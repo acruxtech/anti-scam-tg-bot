@@ -5,3 +5,6 @@
 2024-11-19 01:15:48,956 - [ERROR] - src.handlers.basic - (basic.py).get_scammer_id(128) - invalid literal for int() with base 10: 'кмасвы'
 2024-11-19 01:15:49,066 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427346225 is handled. Duration 113 ms by bot id=5782161283
 2024-11-19 01:15:52,564 - [INFO] - aiogram.event - (dispatcher.py).feed_update(172) - Update id=427346226 is handled. Duration 217 ms by bot id=5782161283
+2024-11-19 01:38:20,188 - [WARNING] - aiogram.dispatcher - (dispatcher.py)._signal_stop_polling(455) - Received SIGINT signal
+2024-11-19 01:38:20,189 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(359) - Polling stopped for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
+2024-11-19 01:38:20,189 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(554) - Polling stopped
