@@ -1,8 +1,11 @@
 .idea
 .env
-Задачи.txt
-Будущий функционал.txt
 venv
 **/__pycache__/**
 **.pyc
 /assets/scammers.json
+/assets/scammer_data.csv
+/assets/scammer_data.txt
+/assets/TEST.xlsx
+/assets/Список скамеров.xlsx
+*.log

@@ -1,2 +1,0 @@
-2024-12-25 00:01:28,592 - [INFO] - aiogram.dispatcher - (dispatcher.py).start_polling(527) - Start polling
-2024-12-25 00:01:28,650 - [INFO] - aiogram.dispatcher - (dispatcher.py)._polling(341) - Run polling for bot @more_actions_bot id=5782161283 - 'More Actions Bot'
