@@ -9,3 +9,4 @@ venv
 /assets/TEST.xlsx
 /assets/Список скамеров.xlsx
 *.log
+*.session
