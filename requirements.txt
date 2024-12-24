@@ -7,3 +7,5 @@ pydantic
 cachetools
 aioschedule
 openpyxl
+pyrogram
+TgCrypto

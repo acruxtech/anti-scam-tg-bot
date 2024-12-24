@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG = False
+DEBUG = True
 
 DB_HOST = os.environ.get("DB_HOST_TEST") if DEBUG else os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT_TEST") if DEBUG else os.environ.get("DB_PORT")
@@ -19,3 +19,7 @@ MODERATOR_ID = os.environ.get("MODERATOR_ID_TEST") if DEBUG else os.environ.get(
 TECH_SUPPORT_ID = os.environ.get("TECH_SUPPORT_ID")
 
 OWNER_IDS = list(map(int, os.environ.get("OWNER_IDS").split("_")))
+
+API_ID = os.environ.get("API_ID")
+API_HASH = os.environ.get("API_HASH")
+USER_INFO_CHANNEL_ID = os.environ.get("USER_INFO_CHANNEL_ID")

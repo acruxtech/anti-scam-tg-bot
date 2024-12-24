@@ -4,16 +4,17 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 
-from src.middlewares.limit import RateLimitMiddleware
-from src.utils.systems import get_start, get_stop
+from src.core.middlewares.limit import RateLimitMiddleware
+from src.core.utils.systems import get_start, get_stop
 from src.config import BOT_TOKEN
-from src.handlers import basic, scammer, contact, admin, chat, add
-from src.entities.scammers.service import scammers_repository
+from src.core.handlers import admin, basic, contact, inline, add, scammer, chat
+from src.db.errors import DBError
+from src.db.models import Scammer
 
 from assets.data import scammer_ids_and_usernames
-from src.db.repository import IntegrityException
 
-from src.db.database import engine, Base
+from src.db.database import engine
+from src.db.base import Base
 
 
 async def start():
@@ -34,8 +35,8 @@ async def start():
         await conn.run_sync(Base.metadata.create_all)
 
     try:
-        await scammers_repository.create_many(scammer_ids_and_usernames)
-    except IntegrityException as e:
+        await Scammer.repository().create_many(scammer_ids_and_usernames)
+    except DBError:
         print("Скамеры уже добавлены в базу")
 
     bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
@@ -51,6 +52,7 @@ async def start():
     dp.include_router(contact.router)
     dp.include_router(chat.router)
     dp.include_router(add.router)
+    dp.include_router(inline.router)
 
     dp.startup.register(get_start)
     dp.shutdown.register(get_stop)
