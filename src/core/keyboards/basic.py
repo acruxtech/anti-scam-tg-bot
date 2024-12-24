@@ -171,3 +171,9 @@ def get_go_to_menu_keyboard():
     return keyboard_builder.as_markup(
         resize_keyboard=True, one_time_keyboard=True,
     )
+
+
+def get_inline_keyboard():
+    keyboard_builder = InlineKeyboardBuilder()
+    keyboard_builder.button(text="Выполняется поиск", callback_data="pass")
+    return keyboard_builder.as_markup()

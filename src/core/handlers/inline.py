@@ -1,13 +1,21 @@
 import logging
+import time
+
 import pyrogram
 
 from aiogram import Bot, Router
 from aiogram.types import InlineQuery, InlineQueryResultArticle, InputTextMessageContent, ChosenInlineResult
 from aiogram.fsm.state import State, StatesGroup
 from pyrogram import Client
+from pyrogram.enums import ParseMode
+from pyrogram.errors import UsernameNotOccupied
 
 from src.config import API_ID, API_HASH, USER_INFO_CHANNEL_ID
-from src.core.services import scammers_service, chat_service
+from src.core.keyboards.basic import get_inline_keyboard
+from src.core.services import scammers_service, chat_service, user_info_service
+from src.core.schemas import UserInfoScheme
+
+last_request_time = {}
 
 
 class InlineState(StatesGroup):
@@ -21,14 +29,7 @@ logger = logging.getLogger(__name__)
 F: InlineQuery
 
 
-class UserNotFoundError(Exception):
-    def __init__(self, message="Пользователь не найден"):
-        self.message = message
-        super().__init__(self.message)
-
-
-async def send_post_to_channel(username: str, channel_id: int) -> pyrogram.types.Message | None:
-    # try:
+async def send_post_to_channel(username: str, channel_id: int) -> tuple[int, str, str] | None:
     async with Client(
             "session",
             api_id=API_ID,
@@ -43,59 +44,55 @@ async def send_post_to_channel(username: str, channel_id: int) -> pyrogram.types
             user=user
         )
         entities = [mention]
-        return await client.send_message(
-            chat_id=channel_id,
+        sent_message = await client.send_message(
+            chat_id=int(channel_id),
             text="\n".join((
                 f"@{user.username}",
                 f"<b>ID: </b><code>{user.id}</code>",
                 "📎Вечная ссылка"
             )),
+            parse_mode=ParseMode.HTML,
             entities=entities
         )
-    # except errors.UserNotFound:
-    #     raise UserNotFoundError()
-    # except Exception as e:
-    #     raise Exception(f"Ошибка отправки поста: {e}")
+        return user.id, user.username, sent_message.link
 
 
 @router.inline_query()
 async def inline(inline_query: InlineQuery):
-    try:
+    user_id = None
+    if inline_query.query.isdigit():
         user_id = int(inline_query.query)
-    except BaseException as e:
-        logger.error(e)
-        return
-
-    scammer = await scammers_service.get_scammer(user_id)
-    user_sent = await send_post_to_channel(user_id, USER_INFO_CHANNEL_ID)
 
     results = []
 
-    if user_sent:
-        results.append(
-            InlineQueryResultArticle(
-                id="user_info",
-                title="Получить вечную ссылку",
-                input_message_content=InputTextMessageContent(
-                    message_text=f"ID пользователя: {user_id}\n"
-                                 f"Вечная ссылка: {user_sent.link}",
+    if user_id:
+        scammer = await scammers_service.get_scammer(user_id)
+        if scammer:
+            results.append(
+                InlineQueryResultArticle(
+                    id="block",
+                    title="Заблокировать",
+                    input_message_content=InputTextMessageContent(
+                        message_text=f"❌Пользователь ID <a href='https://t.me/{scammer.username}'>{user_id}</a> "
+                                     f"<b>найден в базе</b> и заблокирован во всех чатах, в которых бот состоит "
+                                     f"как админ\n\n@AntiSkamTG_bot",
+                        parse_mode="html",
+                        disable_web_page_preview=True,
+                    )
                 )
             )
-        )
+    results.append(
+        InlineQueryResultArticle(
+            id="user_info",
+            title="Получить вечную ссылку",
+            input_message_content=InputTextMessageContent(
+                message_text=f"<i>Выполняется поиск... Ожидайте⏳</i>",
 
-    if scammer:
-        results.append(
-            InlineQueryResultArticle(
-                id="block",
-                title="Заблокировать",
-                input_message_content=InputTextMessageContent(
-                    message_text=f"❌Пользователь ID <a href='https://t.me/{scammer.username}'>{user_id}</a> <b>найден в базе</b> и заблокирован во всех чатах, в которых бот состоит как админ\n\n@AntiSkamTG_bot",
-                    parse_mode="html",
-                    disable_web_page_preview=True,
-                )
-            )
+            ),
+            reply_markup=get_inline_keyboard(),
         )
-    else:
+    )
+    if not results:
         results.append(
             InlineQueryResultArticle(
                 id="no_scammer",
@@ -120,12 +117,69 @@ async def inline_here_id(chosen_result: ChosenInlineResult, bot: Bot):
     if chosen_result.result_id == "no_scammer":
         return
 
-    user_id = int(chosen_result.query)
-
-    if chosen_result.result_id == "block":
+    elif chosen_result.result_id == "block":
+        user_id = int(chosen_result.query)
         chats = await chat_service.get_chats()
         for chat in chats:
             try:
                 await bot.ban_chat_member(chat.id, user_id)
             except BaseException as e:
                 logger.error(e)
+
+    elif chosen_result.result_id == "user_info":
+        user_id = chosen_result.from_user.id
+        current_time = time.time()
+        if user_id in last_request_time and current_time - last_request_time[user_id] < 60:
+            await bot.edit_message_text(
+                inline_message_id=chosen_result.inline_message_id,
+                text="<i>Можно сделать максимум <b>один</b> запрос в минуту! Ожидайте, пожалуйста</i>",
+                parse_mode="html",
+            )
+            return
+        last_request_time[user_id] = current_time
+
+        user_id, username = None, None
+        if chosen_result.query.isdigit():
+            user_info = await user_info_service.get_user_info_by_id(int(chosen_result.query))
+            if user_info:
+                link = user_info.link
+            else:
+                link = None
+        else:
+            user_info = await user_info_service.get_user_info_by_username(chosen_result.query.lstrip("@"))
+            if user_info:
+                user_id = user_info.id
+                username = user_info.username
+                link = user_info.link
+            else:
+                try:
+                    user_id, username, link = await send_post_to_channel(chosen_result.query, USER_INFO_CHANNEL_ID)
+                except UsernameNotOccupied:
+                    await bot.edit_message_text(
+                        inline_message_id=chosen_result.inline_message_id,
+                        text=f"<i>Пользователя с таким юзернеймом не существует</i>",
+                        parse_mode="html",
+                    )
+                    return
+                await user_info_service.add_user_info(
+                    UserInfoScheme(
+                        id=user_id,
+                        username=username.lstrip("@"),
+                        link=link,
+                    )
+                )
+        if link:
+            await bot.edit_message_text(
+                inline_message_id=chosen_result.inline_message_id,
+                text=f"{username}\n"
+                     f"<i>ID:</i> {user_id}\n"
+                     f"<i>Вечная ссылка:</i> {link}\n",
+                parse_mode="html",
+            )
+        else:
+            await bot.edit_message_text(
+                inline_message_id=chosen_result.inline_message_id,
+                text=f"<i>Пользователь не найден в базе данных. Возвращайтесь позже или "
+                     f"попробуйте получить вечную ссылку по юзернейму</i>",
+                parse_mode="html",
+            )

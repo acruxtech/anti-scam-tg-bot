@@ -4,7 +4,9 @@ from aiogram import Bot, Router, F
 from aiogram.filters import and_f
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
+from pyrogram import Client
 
+from src.config import API_ID, API_HASH
 from src.core.services.scammer import scammers_service
 from src.core.filters.admin import IsAdmin
 from src.core.states.admin import AdminForm, AddRef, DeleteRef
